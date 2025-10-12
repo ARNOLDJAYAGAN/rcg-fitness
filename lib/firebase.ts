@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from "firebase/app"
+import { initializeApp, getApps, type FirebaseApp } from "firebase/app"
 import { getAuth } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 
@@ -12,11 +12,12 @@ const firebaseConfig = {
   appId: typeof window !== "undefined" ? process.env.NEXT_PUBLIC_FIREBASE_APP_ID : "",
 }
 
-// Initialize Firebase only in the browser
-let app
+let app: FirebaseApp | undefined
+
 if (typeof window !== "undefined") {
   app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0]
 }
 
-export const auth = typeof window !== "undefined" ? getAuth(app) : null
-export const db = typeof window !== "undefined" ? getFirestore(app) : null
+// ✅ Tell TypeScript this is definitely not undefined in the browser
+export const auth = typeof window !== "undefined" ? getAuth(app!) : null
+export const db = typeof window !== "undefined" ? getFirestore(app!) : null
