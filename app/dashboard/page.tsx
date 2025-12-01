@@ -1,154 +1,108 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { auth, db } from "@/lib/firebase"
-import { doc, onSnapshot } from "firebase/firestore"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
-import { Header } from "@/components/header"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { API_BASE } from "@/lib/api";
+import { LogoutButton } from "@/components/logout-button";
+import Link from "next/link";
+
+interface Subscription {
+  id: number;
+  plan: string;
+  price: string;
+  status: string;
+  subscribedAt: string;
+}
+
+interface User {
+  id: number;
+  email: string;
+  role: string;
+}
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [membership, setMembership] = useState<any>(null)
-  const router = useRouter()
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        setUser(user)
-        const membershipRef = doc(db, "subscriptions", user.uid)
-        const unsubscribeMembership = onSnapshot(membershipRef, (doc) => {
-          if (doc.exists()) {
-            setMembership(doc.data())
-          } else {
-            setMembership(null)
-          }
-          setLoading(false)
-        })
-
-        return () => unsubscribeMembership()
-      } else {
-        router.push("/auth")
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/auth/check_session.php`, {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (!data.loggedIn) {
+          router.push("/auth");
+        } else {
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.error(err);
+        router.push("/auth");
       }
-    })
+    };
+    fetchUser();
+  }, [router]);
 
-    return () => unsubscribe()
-  }, [router])
+  useEffect(() => {
+    if (!user) return;
+    const fetchSubscription = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/auth/get_user_subscription.php`, {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (data.success) setSubscription(data.subscription);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSubscription();
+  }, [user]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    )
-  }
+  if (loading) return <p className="text-center py-20">Loading...</p>;
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-24">
-        <h1 className="text-4xl font-bold mb-8">
-          Welcome to Your <span className="text-primary">Dashboard</span>
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle>Your Profile</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-2">Email:</p>
-              <p className="text-foreground font-medium break-all">{user?.email}</p>
-              <p className="text-muted-foreground mb-2 mt-4">User ID:</p>
-              <p className="text-foreground font-medium text-sm break-all">{user?.uid}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle>Membership Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {membership ? (
-                <>
-                  <p className="text-primary font-bold text-2xl">{membership.plan}</p>
-                  <p className="text-muted-foreground text-sm mt-2">${membership.price}/month</p>
-                  <p className="text-muted-foreground text-sm mt-2">
-                    Subscribed: {new Date(membership.subscribedAt).toLocaleDateString()}
-                  </p>
-                  <div className="mt-4">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                        membership.status === "active"
-                          ? "bg-green-500/20 text-green-500"
-                          : "bg-yellow-500/20 text-yellow-500"
-                      }`}
-                    >
-                      {membership.status === "active" ? "Active" : "Pending Approval"}
-                    </span>
-                  </div>
-                  {membership.status === "pending" && (
-                    <p className="text-muted-foreground text-xs mt-2">
-                      Your subscription is pending admin approval. You'll be notified once it's activated.
-                    </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <p className="text-muted-foreground font-bold text-2xl">No Active Plan</p>
-                  <Link href="/#membership">
-                    <Button className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
-                      Choose a Plan
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle>Next Class</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-foreground font-medium">HIIT Training</p>
-              <p className="text-muted-foreground text-sm mt-2">Tomorrow at 6:00 PM</p>
-            </CardContent>
-          </Card>
+      {/* Header */}
+      <header className="flex justify-between items-center p-6 bg-black text-white shadow">
+        <Link href="/">
+          <h1 className="text-3xl font-bold cursor-pointer">RCG Fitness</h1>
+        </Link>
+        <div className="flex items-center space-x-4">
+          <span className="font-semibold">Dashboard</span>
+          <LogoutButton />
         </div>
+      </header>
 
-        <Card className="mt-8 bg-card border-border">
-          <CardHeader>
-            <CardTitle>Getting Started</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">Welcome to RCG Fitness! Here's what you can do next:</p>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                <span>Book your first class</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                <span>Schedule a fitness assessment</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                <span>Meet with a personal trainer</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                <span>Explore our facilities</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+      {/* Main */}
+      <main className="p-8 max-w-4xl mx-auto">
+        <h2 className="text-2xl font-bold mb-2">Welcome, {user?.email}</h2>
+        <p className="text-muted-foreground mb-6">Role: {user?.role}</p>
+
+        <div className="p-4 bg-card rounded-lg shadow w-full max-w-md mb-6">
+          <h3 className="text-xl font-bold mb-2">Membership Status</h3>
+          {subscription ? (
+            <p>
+              {subscription.status === "active" && (
+                <span className="text-green-500 font-semibold">Active</span>
+              )}
+              {subscription.status === "pending" && (
+                <span className="text-yellow-500 font-semibold">Pending</span>
+              )}
+              {!subscription.status && <span className="text-gray-400">No status</span>}
+            </p>
+          ) : (
+            <p className="text-gray-400">No membership yet</p>
+          )}
+        </div>
       </main>
     </div>
-  )
+  );
 }

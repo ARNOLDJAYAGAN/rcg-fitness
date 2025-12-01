@@ -1,16 +1,14 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { auth } from "@/lib/firebase"
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
+import { API_BASE } from "@/lib/api"
 
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true)
@@ -27,12 +25,10 @@ export function AuthForm() {
     setLoading(true)
 
     try {
-      if (isLogin) {
-        // Login
-        await signInWithEmailAndPassword(auth, email, password)
-        router.push("/dashboard")
-      } else {
-        // Register
+      const endpoint = isLogin ? "login.php" : "register.php"
+
+      if (!isLogin) {
+        // Registration validation
         if (password !== confirmPassword) {
           setError("Passwords do not match")
           setLoading(false)
@@ -43,11 +39,22 @@ export function AuthForm() {
           setLoading(false)
           return
         }
-        await createUserWithEmailAndPassword(auth, email, password)
-        router.push("/dashboard")
       }
+
+      const res = await fetch(`${API_BASE}/auth/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || "Authentication failed")
+
+      alert(isLogin ? "Logged in successfully!" : "Registered successfully!")
+      router.push("/dashboard")
     } catch (err: any) {
-      setError(err.message || "An error occurred")
+      setError(err.message)
+    } finally {
       setLoading(false)
     }
   }
