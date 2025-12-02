@@ -2,11 +2,17 @@
 
 import type React from "react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 
 export function AuthForm() {
@@ -26,8 +32,8 @@ export function AuthForm() {
     try {
       const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register"
 
+      // Registration validation
       if (!isLogin) {
-        // Registration validation
         if (password !== confirmPassword) {
           setError("Passwords do not match")
           setLoading(false)
@@ -47,9 +53,16 @@ export function AuthForm() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Authentication failed")
 
+      if (!data.success) {
+        // Handle server error
+        throw new Error(data.message || "Authentication failed")
+      }
+
+      // Success alert (optional)
       alert(isLogin ? "Logged in successfully!" : "Registered successfully!")
+
+      // Redirect to dashboard
       router.push("/dashboard")
     } catch (err: any) {
       setError(err.message)
@@ -61,9 +74,13 @@ export function AuthForm() {
   return (
     <Card className="w-full max-w-md bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
+        <CardTitle className="text-2xl font-bold">
+          {isLogin ? "Welcome Back" : "Create Account"}
+        </CardTitle>
         <CardDescription className="text-muted-foreground">
-          {isLogin ? "Sign in to continue your fitness journey" : "Start your transformation today"}
+          {isLogin
+            ? "Sign in to continue your fitness journey"
+            : "Start your transformation today"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -109,7 +126,11 @@ export function AuthForm() {
             </div>
           )}
 
-          {error && <div className="text-destructive text-sm bg-destructive/10 p-3 rounded-md">{error}</div>}
+          {error && (
+            <div className="text-destructive text-sm bg-destructive/10 p-3 rounded-md">
+              {error}
+            </div>
+          )}
 
           <Button
             type="submit"
@@ -137,7 +158,9 @@ export function AuthForm() {
               }}
               className="text-primary hover:underline"
             >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+              {isLogin
+                ? "Don't have an account? Sign up"
+                : "Already have an account? Sign in"}
             </button>
           </div>
         </form>
