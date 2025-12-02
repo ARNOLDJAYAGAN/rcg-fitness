@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { API_BASE } from "@/lib/api"
 
 interface HeaderProps {
   redirectTo?: string
@@ -14,13 +13,15 @@ export function Header({ redirectTo = "/" }: HeaderProps) {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch(`${API_BASE}/auth/check_session.php`, {
+        const res = await fetch("/api/auth/me", {
           method: "GET",
           credentials: "include",
         })
         const data = await res.json()
         if (data.loggedIn) {
           setUser(data.user)
+        } else {
+          setUser(null)
         }
       } catch (err) {
         setUser(null)

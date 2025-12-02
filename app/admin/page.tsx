@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { API_BASE } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle } from "lucide-react";
 
@@ -19,12 +18,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
 
+  // Fetch subscriptions from Next.js API
   const fetchSubscriptions = async () => {
     try {
-      const res = await fetch(`${API_BASE}/admin/get_subscriptions.php`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const res = await fetch("/api/subscriptions/admin"); // updated API route
       const data = await res.json();
       if (data.success) {
         setSubscriptions(data.subscriptions);
@@ -42,12 +39,12 @@ export default function AdminPage() {
     fetchSubscriptions();
   }, []);
 
+  // Approve subscription
   const handleApprove = async (id: number) => {
     setProcessingId(id);
     try {
-      const res = await fetch(`${API_BASE}/admin/approve_subscription.php`, {
+      const res = await fetch("/api/subscriptions/admin/approve", {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
@@ -102,7 +99,7 @@ export default function AdminPage() {
                 </td>
                 <td className="px-4 py-2">{new Date(sub.subscribedAt).toLocaleDateString()}</td>
                 <td className="px-4 py-2">
-                  {sub.status === "pending" && (
+                  {sub.status === "pending" ? (
                     <Button
                       size="sm"
                       className="bg-primary text-white"
@@ -116,8 +113,9 @@ export default function AdminPage() {
                       )}
                       Approve
                     </Button>
+                  ) : (
+                    <span className="text-green-500 font-medium">Approved</span>
                   )}
-                  {sub.status === "active" && <span className="text-green-500 font-medium">Approved</span>}
                 </td>
               </tr>
             ))}

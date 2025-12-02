@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { API_BASE } from "@/lib/api"
 
 export default function AuthPage() {
   const [email, setEmail] = useState("")
@@ -19,11 +18,11 @@ export default function AuthPage() {
     setLoading(true)
 
     try {
-      const endpoint = isLogin ? "login.php" : "register.php"
-      const res = await fetch(`${API_BASE}/auth/${endpoint}`, {
+      // Next.js API route
+      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register"
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // Important for PHP sessions
         body: JSON.stringify({ email, password }),
       })
 

@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
-import { API_BASE } from "@/lib/api"
 
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true)
@@ -25,7 +24,7 @@ export function AuthForm() {
     setLoading(true)
 
     try {
-      const endpoint = isLogin ? "login.php" : "register.php"
+      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register"
 
       if (!isLogin) {
         // Registration validation
@@ -41,7 +40,7 @@ export function AuthForm() {
         }
       }
 
-      const res = await fetch(`${API_BASE}/auth/${endpoint}`, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { API_BASE } from "@/lib/api";
 import { LogoutButton } from "@/components/logout-button";
 import Link from "next/link";
 
@@ -26,13 +25,11 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
 
+  // Fetch logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${API_BASE}/auth/check_session.php`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const res = await fetch("/api/auth/me"); // Next.js API route
         const data = await res.json();
         if (!data.loggedIn) {
           router.push("/auth");
@@ -47,14 +44,12 @@ export default function DashboardPage() {
     fetchUser();
   }, [router]);
 
+  // Fetch user's subscription
   useEffect(() => {
     if (!user) return;
     const fetchSubscription = async () => {
       try {
-        const res = await fetch(`${API_BASE}/auth/get_user_subscription.php`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const res = await fetch(`/api/subscriptions/user/${user.id}`);
         const data = await res.json();
         if (data.success) setSubscription(data.subscription);
       } catch (err) {
