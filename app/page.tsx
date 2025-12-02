@@ -46,7 +46,6 @@ export default function HomePage() {
           RCG Fitness
         </h1>
 
-        {/* Center nav */}
         <nav className="flex space-x-6 mt-4 md:mt-0 justify-center">
           <button
             onClick={() => scrollToSection("facilities")}
@@ -68,7 +67,6 @@ export default function HomePage() {
           </button>
         </nav>
 
-        {/* Right side button */}
         <div className="mt-4 md:mt-0">
           {user ? (
             <Link
@@ -101,17 +99,212 @@ export default function HomePage() {
 
       {/* Facilities Section */}
       <section id="facilities" className="py-20 px-4 bg-card">
-        {/* Your existing facilities content */}
+        <div className="container mx-auto">
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-12">
+            Our <span className="text-primary">Facilities</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-secondary border-border hover:border-primary transition-colors">
+              <CardContent className="p-6 text-center">
+                <Dumbbell className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="text-xl font-bold mb-2">Strength Training</h3>
+                <p className="text-muted-foreground">
+                  State-of-the-art equipment for all your strength training needs
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-secondary border-border hover:border-primary transition-colors">
+              <CardContent className="p-6 text-center">
+                <Users className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="text-xl font-bold mb-2">Group Classes</h3>
+                <p className="text-muted-foreground">
+                  Dynamic group sessions led by certified instructors
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-secondary border-border hover:border-primary transition-colors">
+              <CardContent className="p-6 text-center">
+                <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="text-xl font-bold mb-2">24/7 Access</h3>
+                <p className="text-muted-foreground">
+                  Train on your schedule with round-the-clock facility access
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-secondary border-border hover:border-primary transition-colors">
+              <CardContent className="p-6 text-center">
+                <Award className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="text-xl font-bold mb-2">Personal Training</h3>
+                <p className="text-muted-foreground">
+                  One-on-one coaching tailored to your fitness goals
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </section>
 
       {/* Membership Section */}
       <section id="membership" className="py-20 px-4">
-        {/* Your existing membership content */}
+        <div className="container mx-auto">
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-12">
+            Membership <span className="text-primary">Plans</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Basic Plan */}
+            <Card className="bg-card border-border hover:border-primary transition-all hover:scale-105">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold mb-4">Basic</h3>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-primary">$29</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Gym access during peak hours</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Locker room access</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Free fitness assessment</span>
+                  </li>
+                </ul>
+                <Link href="/payment?plan=Basic&price=29">
+                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground">
+                    Get Started
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Premium Plan */}
+            <Card className="bg-card border-primary border-2 hover:scale-105 transition-all relative">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
+                Popular
+              </div>
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold mb-4">Premium</h3>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-primary">$59</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>24/7 gym access</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>All group classes included</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Guest privileges</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Nutrition consultation</span>
+                  </li>
+                </ul>
+                <Link href="/payment?plan=Premium&price=59">
+                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">Get Started</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Elite Plan */}
+            <Card className="bg-card border-border hover:border-primary transition-all hover:scale-105">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold mb-4">Elite</h3>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-primary">$99</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Everything in Premium</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Personal training sessions</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Spa & sauna access</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <span>Priority booking</span>
+                  </li>
+                </ul>
+                <Link href="/payment?plan=Elite&price=99">
+                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground">
+                    Get Started
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </section>
 
       {/* Reviews Section */}
       <section id="reviews" className="py-20 px-4 bg-card">
-        {/* Your existing reviews content */}
+        <div className="container mx-auto">
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-12">
+            Member <span className="text-primary">Reviews</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="bg-secondary border-border">
+              <CardContent className="p-6">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="text-foreground mb-4">
+                  "RCG Fitness has completely transformed my life. The trainers are amazing and the facilities are
+                  top-notch!"
+                </p>
+                <p className="font-semibold text-primary">- Sarah Johnson</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-secondary border-border">
+              <CardContent className="p-6">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="text-foreground mb-4">
+                  "Best gym I've ever been to. The 24/7 access is perfect for my schedule, and the community is
+                  incredibly supportive."
+                </p>
+                <p className="font-semibold text-primary">- Mike Chen</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-secondary border-border">
+              <CardContent className="p-6">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="text-foreground mb-4">
+                  "I've achieved goals I never thought possible. The personal training program is worth every penny!"
+                </p>
+                <p className="font-semibold text-primary">- Emily Rodriguez</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
