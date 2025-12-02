@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // Create a single Postgres pool
 const pool = new Pool({
-  connectionString: process.env.NEON_DB_URL, // add NEON_DB_URL in .env.local
-  ssl: { rejectUnauthorized: false },       // required for Neon
+  connectionString: process.env.NEON_DB_URL,
+  ssl: { rejectUnauthorized: false }, // required for Neon
 });
 
-// Define a TypeScript type for the user row
+// Define TypeScript type for user row
 interface UserRow {
   id: number;
   email: string;
@@ -38,14 +39,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Invalid password" });
     }
 
-    // Return user info (never send password back)
+    // Prepare user response
     const userResponse = {
       id: user.id,
       email: user.email,
       role: user.role,
     };
 
-    return NextResponse.json({ success: true, user: userResponse });
+    // Create JWT
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    );
+
+    // Set HTTP-only cookie
+    const response = NextResponse.json({ success: true, user: userResponse });
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return response;
 
   } catch (error) {
     console.error("Login error:", error);
