@@ -2,13 +2,17 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
-interface HeaderProps {
-  redirectTo?: string
+interface User {
+  id: string
+  email: string
+  role: string
 }
 
-export function Header({ redirectTo = "/" }: HeaderProps) {
-  const [user, setUser] = useState<{ id: string; email: string; role: string } | null>(null)
+export function Header() {
+  const [user, setUser] = useState<User | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const checkSession = async () => {
@@ -31,12 +35,23 @@ export function Header({ redirectTo = "/" }: HeaderProps) {
     checkSession()
   }, [])
 
+  const handleLogoClick = () => {
+    if (user) {
+      router.push("/dashboard")
+    } else {
+      router.push("/")
+    }
+  }
+
   return (
     <header className="flex justify-between items-center px-8 py-4 border-b border-gray-200 bg-background">
       {/* Left side: Logo / RCG Fitness */}
-      <Link href={redirectTo} className="text-2xl font-bold text-primary">
+      <h1
+        className="text-2xl font-bold text-primary cursor-pointer"
+        onClick={handleLogoClick}
+      >
         RCG Fitness
-      </Link>
+      </h1>
 
       {/* Right side: Dashboard or Start Journey */}
       <nav>
