@@ -9,20 +9,27 @@ const pool = new Pool({
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { name, email, password } = await req.json();
 
+    if (!name || !email || !password) {
+      return NextResponse.json({ success: false, message: "Name, email, and password are required" });
+    }
+
+    // Check if email exists
+    const existing = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (existing.rows.length > 0) {
+      return NextResponse.json({ success: false, message: "Email already exists" });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const result = await pool.query(
-      "INSERT INTO users (email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, email, role",
-      [email, hashedPassword, "user"]
-    );
+    // Insert user
+    await pool.query("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", [name, email, hashedPassword]);
 
-    const user = result.rows[0];
-
-    return NextResponse.json({ success: true, user });
-  } catch (err: any) {
-    console.error("Register error:", err);
-    return NextResponse.json({ success: false, message: err.message });
+    return NextResponse.json({ success: true, message: "Registered successfully!" });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ success: false, message: "Server error" });
   }
 }
