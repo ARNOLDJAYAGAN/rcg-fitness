@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dumbbell, Users, Clock, Award, Star } from "lucide-react"
@@ -16,7 +15,7 @@ export default function HomePage() {
         const res = await fetch("/api/auth/me", { credentials: "include" })
         const data = await res.json()
         if (data.loggedIn) setUser(data.user)
-      } catch (err) {
+      } catch {
         setUser(null)
       }
     }
@@ -28,13 +27,21 @@ export default function HomePage() {
     section?.scrollIntoView({ behavior: "smooth" })
   }
 
+  const handleLogoClick = () => {
+    if (user) {
+      window.location.href = "/dashboard"
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with dynamic button */}
+      {/* Header */}
       <header className="flex flex-col md:flex-row justify-between items-center px-8 py-4 border-b border-gray-200 bg-background">
         <h1
           className="text-3xl font-bold text-primary cursor-pointer"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={handleLogoClick}
         >
           RCG Fitness
         </h1>
@@ -94,17 +101,17 @@ export default function HomePage() {
 
       {/* Facilities Section */}
       <section id="facilities" className="py-20 px-4 bg-card">
-        {/* ...Your existing Facilities content... */}
+        {/* Your existing facilities content */}
       </section>
 
       {/* Membership Section */}
       <section id="membership" className="py-20 px-4">
-        {/* ...Your existing Membership content... */}
+        {/* Your existing membership content */}
       </section>
 
       {/* Reviews Section */}
       <section id="reviews" className="py-20 px-4 bg-card">
-        {/* ...Your existing Reviews content... */}
+        {/* Your existing reviews content */}
       </section>
 
       {/* Footer */}

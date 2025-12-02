@@ -2,17 +2,15 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 
 interface User {
-  id: string
+  id: number
   email: string
   role: string
 }
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null)
-  const router = useRouter()
 
   useEffect(() => {
     const checkSession = async () => {
@@ -22,38 +20,21 @@ export function Header() {
           credentials: "include",
         })
         const data = await res.json()
-        if (data.loggedIn) {
-          setUser(data.user)
-        } else {
-          setUser(null)
-        }
-      } catch (err) {
+        if (data.loggedIn) setUser(data.user)
+        else setUser(null)
+      } catch {
         setUser(null)
       }
     }
-
     checkSession()
   }, [])
 
-  const handleLogoClick = () => {
-    if (user) {
-      router.push("/dashboard")
-    } else {
-      router.push("/")
-    }
-  }
-
   return (
     <header className="flex justify-between items-center px-8 py-4 border-b border-gray-200 bg-background">
-      {/* Left side: Logo / RCG Fitness */}
-      <h1
-        className="text-2xl font-bold text-primary cursor-pointer"
-        onClick={handleLogoClick}
-      >
+      <Link href={user ? "/dashboard" : "/"} className="text-2xl font-bold text-primary">
         RCG Fitness
-      </h1>
+      </Link>
 
-      {/* Right side: Dashboard or Start Journey */}
       <nav>
         {user ? (
           <Link
