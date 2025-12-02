@@ -1,75 +1,79 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+} from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 export function AuthForm() {
-  const [isLogin, setIsLogin] = useState(true)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register"
+      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
 
       // Registration validation
       if (!isLogin) {
-        if (password !== confirmPassword) {
-          setError("Passwords do not match")
-          setLoading(false)
-          return
+        if (!name || !email || !password) {
+          setError("Name, email, and password are required");
+          setLoading(false);
+          return;
         }
+
+        if (password !== confirmPassword) {
+          setError("Passwords do not match");
+          setLoading(false);
+          return;
+        }
+
         if (password.length < 6) {
-          setError("Password must be at least 6 characters")
-          setLoading(false)
-          return
+          setError("Password must be at least 6 characters");
+          setLoading(false);
+          return;
         }
       }
 
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
+        body: JSON.stringify({
+          name: isLogin ? undefined : name,
+          email,
+          password,
+        }),
+      });
 
-      const data = await res.json()
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Authentication failed");
 
-      if (!data.success) {
-        // Handle server error
-        throw new Error(data.message || "Authentication failed")
-      }
-
-      // Success alert (optional)
-      alert(isLogin ? "Logged in successfully!" : "Registered successfully!")
-
-      // Redirect to dashboard
-      router.push("/dashboard")
+      alert(isLogin ? "Logged in successfully!" : "Registered successfully!");
+      router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md bg-card border-border">
@@ -83,8 +87,24 @@ export function AuthForm() {
             : "Start your transformation today"}
         </CardDescription>
       </CardHeader>
+
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -94,7 +114,6 @@ export function AuthForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-input border-border text-foreground"
             />
           </div>
 
@@ -107,7 +126,6 @@ export function AuthForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-input border-border text-foreground"
             />
           </div>
 
@@ -121,7 +139,6 @@ export function AuthForm() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="bg-input border-border text-foreground"
               />
             </div>
           )}
@@ -134,8 +151,8 @@ export function AuthForm() {
 
           <Button
             type="submit"
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
             disabled={loading}
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
           >
             {loading ? (
               <>
@@ -152,11 +169,11 @@ export function AuthForm() {
           <div className="text-center text-sm">
             <button
               type="button"
-              onClick={() => {
-                setIsLogin(!isLogin)
-                setError("")
-              }}
               className="text-primary hover:underline"
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError("");
+              }}
             >
               {isLogin
                 ? "Don't have an account? Sign up"
@@ -166,5 +183,5 @@ export function AuthForm() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
