@@ -3,19 +3,10 @@ import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// Create a single Postgres pool
 const pool = new Pool({
   connectionString: process.env.NEON_DB_URL,
-  ssl: { rejectUnauthorized: false }, // required for Neon
+  ssl: { rejectUnauthorized: false },
 });
-
-// Define TypeScript type for user row
-interface UserRow {
-  id: number;
-  email: string;
-  password: string;
-  role: string;
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,36 +16,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Email and password are required" });
     }
 
-    // Query user by email
-    const result = await pool.query<UserRow>("SELECT * FROM users WHERE email = $1", [email]);
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     const user = result.rows[0];
 
     if (!user) {
       return NextResponse.json({ success: false, message: "User not found" });
     }
 
-    // Compare password
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return NextResponse.json({ success: false, message: "Invalid password" });
     }
 
-    // Prepare user response
-    const userResponse = {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    };
-
     // Create JWT
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
-    // Set HTTP-only cookie
-    const response = NextResponse.json({ success: true, user: userResponse });
+    const response = NextResponse.json({ success: true, user: { id: user.id, email: user.email, role: user.role } });
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -63,9 +44,8 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
-
-  } catch (error) {
-    console.error("Login error:", error);
+  } catch (err) {
+    console.error("Login error:", err);
     return NextResponse.json({ success: false, message: "Server error" });
   }
 }
