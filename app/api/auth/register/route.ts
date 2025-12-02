@@ -9,17 +9,13 @@ const pool = new Pool({
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name } = await req.json();
-
-    if (!email || !password || !name) {
-      return NextResponse.json({ success: false, message: "Name, email, and password are required" });
-    }
+    const { email, password } = await req.json();
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, email, role",
-      [name, email, hashedPassword, "user"]
+      "INSERT INTO users (email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, email, role",
+      [email, hashedPassword, "user"]
     );
 
     const user = result.rows[0];
