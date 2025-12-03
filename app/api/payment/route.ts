@@ -2,24 +2,21 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { pool } from "@/lib/db";
 
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-11-17.clover",
+  apiVersion: "2025-11-17.clover", // satisfies TypeScript
 });
-
-
 export async function POST(req: Request) {
   try {
     const { user_id, plan } = await req.json();
 
-    // Define plan prices (in cents)
     const priceLookup: Record<string, number> = {
-      Basic: 999,      // $9.99
-      Premium: 1999,   // $19.99
+      Basic: 999,    // $9.99
+      Premium: 1999, // $19.99
     };
 
     if (!priceLookup[plan]) throw new Error("Invalid plan");
 
-    // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
@@ -27,7 +24,7 @@ export async function POST(req: Request) {
         {
           price_data: {
             currency: "usd",
-            product_data: { name: plan + " Plan" },
+            product_data: { name: `${plan} Plan` },
             unit_amount: priceLookup[plan],
           },
           quantity: 1,
@@ -37,9 +34,12 @@ export async function POST(req: Request) {
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
     });
 
-    // Optionally: insert a "pending" subscription in your DB
+    // Insert/update pending subscription
     await pool.query(
-      "INSERT INTO subscriptions (user_id, plan, price) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET plan = EXCLUDED.plan, price = EXCLUDED.price",
+      `INSERT INTO subscriptions (user_id, plan, price) 
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id) 
+       DO UPDATE SET plan = EXCLUDED.plan, price = EXCLUDED.price`,
       [user_id, plan, priceLookup[plan] / 100]
     );
 
