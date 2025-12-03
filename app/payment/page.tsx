@@ -37,26 +37,27 @@ export default function PaymentPage() {
     fetchUser();
   }, [router]);
 
+  // Handle subscription "Done" click
   const handleDone = async () => {
     if (!user) return;
+
     if (!phone.trim() || !name.trim()) {
       alert("Please fill in all fields");
       return;
     }
 
     setLoading(true);
+
     try {
       const res = await fetch(`${API_BASE}/subscriptions/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: user.id,
-          email: user.email,
           plan,
           price,
           phone,
           name,
-          status: "pending",
         }),
       });
 
@@ -92,20 +93,23 @@ export default function PaymentPage() {
             <CardTitle>Selected Plan: {plan}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-primary mb-2">₱{price}/month</p>
+            <p className="text-3xl font-bold text-primary mb-4">₱{price}/month</p>
             <input
-              className="w-full border p-2 mb-4"
+              className="w-full border p-2 mb-4 rounded"
               placeholder="Your Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <input
-              className="w-full border p-2 mb-4"
+              className="w-full border p-2 mb-4 rounded"
               placeholder="Phone Number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
-            <Button onClick={handleDone} className="w-full bg-primary text-white py-3">
+            <Button
+              onClick={handleDone}
+              className="w-full bg-primary text-white py-3 font-semibold hover:bg-primary/90"
+            >
               Done
             </Button>
           </CardContent>

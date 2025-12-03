@@ -3,23 +3,22 @@ import { pool } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    const { user_id, email, name, phone, plan, price } = await req.json();
+    const { user_id, plan, price, phone, name } = await req.json();
 
-    // Basic validation
     if (!user_id || !plan || !price) {
       return NextResponse.json({ success: false, message: "Missing required fields" });
     }
 
-    // Insert subscription with status "pending"
+    // Insert pending subscription
     await pool.query(
-      `INSERT INTO subscriptions (user_id, email, name, phone, plan, price, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'pending')`,
-      [user_id, email, name, phone, plan, price]
+      `INSERT INTO subscriptions (user_id, plan, price, phone, name, status, subscribed_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+      [user_id, plan, price, phone || "", name || "", "pending"]
     );
 
-    return NextResponse.json({ success: true, message: "Subscription created successfully!" });
+    return NextResponse.json({ success: true, message: "Subscription created successfully" });
   } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ success: false, message: "Server error", error: err.message });
+    console.error("Subscription API error:", err);
+    return NextResponse.json({ success: false, message: "Server error" });
   }
 }
