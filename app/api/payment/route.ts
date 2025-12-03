@@ -42,6 +42,8 @@ export async function POST(req: Request) {
        DO UPDATE SET plan = EXCLUDED.plan, price = EXCLUDED.price`,
       [user_id, plan, priceLookup[plan] / 100]
     );
+    console.log("Stripe key:", process.env.STRIPE_SECRET_KEY);
+
 
     return NextResponse.json({ url: session.url });
   } catch (err: any) {
