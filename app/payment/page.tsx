@@ -4,11 +4,8 @@ import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Loader2, CheckCircle } from "lucide-react"
 import { Header } from "@/components/header"
-import Image from "next/image"
 import { API_BASE } from "@/lib/api"
 
 function PaymentContent() {
@@ -17,8 +14,6 @@ function PaymentContent() {
   const [user, setUser] = useState<{ id: number; email: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [success, setSuccess] = useState(false)
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [location, setLocation] = useState("")
 
   const plan = searchParams.get("plan") || "Premium"
   const price = searchParams.get("price") || "59"
@@ -44,41 +39,25 @@ function PaymentContent() {
     fetchUser()
   }, [router])
 
+  // Stripe Checkout handler
   const handlePaymentComplete = async () => {
     if (!user) return
 
-    if (!phoneNumber.trim() || !location.trim()) {
-      alert("Please fill in all fields")
-      return
-    }
-
-    setLoading(true)
-
     try {
-      const res = await fetch(`${API_BASE}/subscriptions/create`, {
+      const res = await fetch(`${API_BASE}/payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          userId: user.id,
-          email: user.email,
-          plan,
-          price,
-          phoneNumber,
-          location,
-          status: "pending",
-        }),
+        body: JSON.stringify({ user_id: user.id, plan, price }),
       })
 
       const data = await res.json()
-      if (!data.success) throw new Error(data.message || "Failed to save subscription")
+      if (!data.url) throw new Error(data.error || "Failed to initiate payment")
 
-      setSuccess(true)
-      setTimeout(() => router.push("/dashboard"), 2000)
+      // Redirect user to Stripe Checkout
+      window.location.href = data.url
     } catch (err: any) {
       console.error(err)
       alert(err.message)
-      setLoading(false)
     }
   }
 
@@ -120,59 +99,23 @@ function PaymentContent() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-primary mb-2">${price}/month</p>
-              <p className="text-muted-foreground">You're subscribing to the {plan} membership plan.</p>
-            </CardContent>
-          </Card>
-
-          {/* GCash QR Code */}
-          <Card className="bg-card border-border mb-6">
-            <CardHeader>
-              <CardTitle>Scan GCash QR Code</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center">
-              <div className="bg-white p-8 rounded-lg mb-6">
-                <Image src="/gcash-qr-code.jpg" alt="GCash QR Code" width={300} height={300} className="rounded-lg" />
-              </div>
-              <p className="text-muted-foreground text-center mb-6">
-                Scan this QR code with your GCash app to complete the payment of ${price}
+              <p className="text-muted-foreground">
+                You're subscribing to the {plan} membership plan.
               </p>
             </CardContent>
           </Card>
 
-          {/* Contact Form */}
+          {/* Stripe Payment Button */}
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
+              <CardTitle>Proceed to Payment</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="Enter your phone number"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="bg-background border-border"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  type="text"
-                  placeholder="Enter your location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="bg-background border-border"
-                />
-              </div>
+            <CardContent>
               <Button
                 onClick={handlePaymentComplete}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-lg py-6 flex items-center justify-center"
               >
-                <CheckCircle className="w-5 h-5 mr-2" />
-                I've Completed the Payment
+                Pay Now
               </Button>
             </CardContent>
           </Card>

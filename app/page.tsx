@@ -92,13 +92,79 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Membership */}
-      <section id="membership" className="py-20 px-4 text-center">
-        <h2 className="text-3xl md:text-5xl font-bold mb-12">
-          Membership <span className="text-primary">Plans</span>
-        </h2>
-        {/* Membership cards go here (similar to facilities) */}
-      </section>
+     {/* Membership */}
+<section id="membership" className="py-20 px-4 text-center">
+  <h2 className="text-3xl md:text-5xl font-bold mb-12">
+    Membership <span className="text-primary">Plans</span>
+  </h2>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+
+    {/* Basic Plan */}
+    <Card className="border-border bg-secondary hover:border-primary transition-colors">
+      <CardContent className="p-8 text-center">
+        <Star className="w-12 h-12 text-primary mx-auto mb-4" />
+        <h3 className="text-2xl font-bold mb-2">Basic</h3>
+        <p className="text-muted-foreground mb-4">Perfect for beginners</p>
+        <p className="text-4xl font-bold mb-6">₱499<span className="text-lg font-normal">/month</span></p>
+
+        <ul className="space-y-2 text-muted-foreground mb-6">
+          <li>✔ Unlimited Gym Access</li>
+          <li>✔ Basic Equipment</li>
+          <li>✔ Locker Room Access</li>
+        </ul>
+
+        <Button className="w-full bg-primary hover:bg-primary/90 text-white">
+          Choose Plan
+        </Button>
+      </CardContent>
+    </Card>
+
+    {/* Standard Plan */}
+    <Card className="border-border bg-secondary hover:border-primary transition-colors">
+      <CardContent className="p-8 text-center">
+        <Award className="w-12 h-12 text-primary mx-auto mb-4" />
+        <h3 className="text-2xl font-bold mb-2">Standard</h3>
+        <p className="text-muted-foreground mb-4">Best for active members</p>
+        <p className="text-4xl font-bold mb-6">₱999<span className="text-lg font-normal">/month</span></p>
+
+        <ul className="space-y-2 text-muted-foreground mb-6">
+          <li>✔ Unlimited Gym Access</li>
+          <li>✔ Group Classes</li>
+          <li>✔ Priority Locker</li>
+          <li>✔ Trainer Assistance</li>
+        </ul>
+
+        <Button className="w-full bg-primary hover:bg-primary/90 text-white">
+          Choose Plan
+        </Button>
+      </CardContent>
+    </Card>
+
+    {/* Premium Plan */}
+    <Card className="border-border bg-secondary hover:border-primary transition-colors">
+      <CardContent className="p-8 text-center">
+        <Users className="w-12 h-12 text-primary mx-auto mb-4" />
+        <h3 className="text-2xl font-bold mb-2">Premium</h3>
+        <p className="text-muted-foreground mb-4">Full experience for serious lifters</p>
+        <p className="text-4xl font-bold mb-6">₱1,499<span className="text-lg font-normal">/month</span></p>
+
+        <ul className="space-y-2 text-muted-foreground mb-6">
+          <li>✔ 24/7 Gym Access</li>
+          <li>✔ All Group Classes</li>
+          <li>✔ Free Personal Training (2 sessions)</li>
+          <li>✔ Sauna & Premium Locker</li>
+        </ul>
+
+        <Button className="w-full bg-primary hover:bg-primary/90 text-white">
+          Choose Plan
+        </Button>
+      </CardContent>
+    </Card>
+
+  </div>
+</section>
+
 
       {/* Reviews */}
       <section id="reviews" className="py-20 px-4 bg-card text-center">

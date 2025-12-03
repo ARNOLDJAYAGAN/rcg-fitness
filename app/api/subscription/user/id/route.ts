@@ -1,12 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Pool } from "pg";
+import { NextResponse } from "next/server";
+import { pool } from "@/lib/db"; // make sure your pool connects to Neon
 
-const pool = new Pool({
-  connectionString: process.env.NEON_DB_URL,
-  ssl: { rejectUnauthorized: false },
-});
-
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
     const result = await pool.query(
       "SELECT * FROM subscriptions WHERE user_id = $1",
@@ -15,8 +10,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     const subscription = result.rows[0] || null;
     return NextResponse.json({ success: true, subscription });
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
-    return NextResponse.json({ success: false, message: "Server error" });
+    return NextResponse.json({ success: false, error: err.message });
   }
 }
