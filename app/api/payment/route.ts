@@ -4,8 +4,9 @@ import { pool } from "@/lib/db";
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-11-17.clover", // satisfies TypeScript
+  apiVersion: "2025-11-17.clover",
 });
+
 export async function POST(req: Request) {
   try {
     const { user_id, plan } = await req.json();
@@ -34,7 +35,6 @@ export async function POST(req: Request) {
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
     });
 
-    // Insert/update pending subscription
     await pool.query(
       `INSERT INTO subscriptions (user_id, plan, price) 
        VALUES ($1, $2, $3)
