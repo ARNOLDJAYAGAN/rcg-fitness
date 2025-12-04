@@ -46,7 +46,7 @@ export default function PaymentPage() {
 
     setLoading(true);
     try {
-     const res = await fetch(`${API_BASE}/subscriptions/create`, {
+     const res = await fetch(`${API_BASE}/subscription/create`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   credentials: "include",
