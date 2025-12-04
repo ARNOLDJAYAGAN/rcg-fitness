@@ -1,13 +1,18 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function SimpleHeader() {
+  const router = useRouter();
+
   return (
     <header className="bg-black text-white p-4">
-      <Link href="/app" className="text-xl font-bold">
+      <h1
+        className="text-xl font-bold cursor-pointer"
+        onClick={() => router.push("/")}  // <-- go to landing page
+      >
         RCG Fitness
-      </Link>
+      </h1>
     </header>
   );
 }
