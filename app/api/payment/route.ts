@@ -1,38 +1,34 @@
-import { NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import { pool } from "@/lib/db"; // make sure this uses NEON_DB_URL
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { user_id, plan } = await req.json();
+    const { user_id, plan, price, name, phone } = await req.json();
 
-    if (!user_id || !plan) {
-      return NextResponse.json({ success: false, message: "Missing fields" });
+    // Validate required fields
+    if (!user_id || !plan || !price || !name || !phone) {
+      return NextResponse.json({
+        success: false,
+        message: "Missing required fields",
+      });
     }
 
-    // Example price lookup
-    const priceLookup: Record<string, number> = {
-      Basic: 999,
-      Premium: 1999,
-    };
-
-    const price = priceLookup[plan] ?? null;
-    if (!price) {
-      return NextResponse.json({ success: false, message: "Invalid plan" });
-    }
-
-    // Insert fake payment (pending)
+    // Insert the subscription as pending
     await pool.query(
-      `INSERT INTO subscriptions (user_id, plan, price, status)
-        VALUES ($1, $2, $3, 'pending')`,
-      [user_id, plan, price / 100]
+      `INSERT INTO subscriptions (user_id, plan, price, name, phone, status)
+       VALUES ($1, $2, $3, $4, $5, 'pending')`,
+      [user_id, plan, price, name, phone]
     );
 
     return NextResponse.json({
       success: true,
-      message: "Fake payment created. Status = pending",
+      message: "Subscription created. Status = pending",
     });
   } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ success: false, error: "Server error" });
+    console.error("Payment API error:", err);
+    return NextResponse.json({
+      success: false,
+      message: "Server error",
+    });
   }
 }
