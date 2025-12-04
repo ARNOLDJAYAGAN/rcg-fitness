@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle } from "lucide-react";
-import { Header } from "@/components/header";
 import { API_BASE } from "@/lib/api";
 
 export default function PaymentPage() {
@@ -25,7 +25,14 @@ export default function PaymentPage() {
     const fetchUser = async () => {
       try {
         const res = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
-        const data = await res.json();
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { loggedIn: false };
+        }
+
         if (!data.loggedIn) router.push("/auth");
         else setUser(data.user);
       } catch {
@@ -37,47 +44,61 @@ export default function PaymentPage() {
     fetchUser();
   }, [router]);
 
-  // Handle subscription "Done" click
+  // Handle Done button
   const handleDone = async () => {
     if (!user) return;
+
     if (!phone.trim() || !name.trim()) {
       alert("Please fill in all fields");
       return;
     }
 
     setLoading(true);
+
     try {
-      const res = await fetch(`${API_BASE}/subscriptions/create`, {
+      const res = await fetch(`${API_BASE}/payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: user.id,
           plan,
           price,
-          phone,
           name,
+          phone,
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text(); // get raw text
+      let data;
+      try {
+        data = JSON.parse(text); // parse JSON safely
+      } catch {
+        throw new Error("Server returned invalid JSON");
+      }
+
       if (!data.success) throw new Error(data.message || "Failed to create subscription");
 
       setSuccess(true);
       setTimeout(() => router.push("/dashboard"), 1500);
     } catch (err: any) {
       console.error(err);
-      alert(err.message);
+      alert(err.message || "An error occurred");
       setLoading(false);
     }
   };
 
-  if (loading) return <Loader2 className="animate-spin w-8 h-8 mx-auto my-20" />;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin w-8 h-8 text-primary" />
+      </div>
+    );
 
   if (success)
     return (
-      <div className="text-center py-20">
-        <CheckCircle className="mx-auto w-16 h-16 text-green-500" />
-        <h2 className="text-2xl font-bold mt-4">Subscription Pending!</h2>
+      <div className="min-h-screen flex flex-col items-center justify-center text-center">
+        <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
+        <h2 className="text-2xl font-bold">Subscription Pending!</h2>
         <p>Redirecting to dashboard...</p>
       </div>
     );
