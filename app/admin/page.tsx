@@ -22,7 +22,7 @@ export default function AdminPage() {
 
   const fetchSubscriptions = async () => {
     try {
-      const res = await fetch("/api/subscriptions/admin");
+      const res = await fetch("/api/subscription/admin");
       const data = await res.json();
       if (data.success) setSubscriptions(data.subscriptions);
     } catch (err) {
@@ -39,7 +39,7 @@ export default function AdminPage() {
   const handleApprove = async (id: number) => {
     setProcessingId(id);
     try {
-      const res = await fetch("/api/subscriptions/admin/approve", {
+      const res = await fetch("/api/subscription/admin/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
