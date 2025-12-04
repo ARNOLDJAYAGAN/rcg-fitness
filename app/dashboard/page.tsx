@@ -10,12 +10,13 @@ import { SimpleHeader } from "@/components/simple-header";
 interface User {
   id: number;
   email: string;
+  name: string;
 }
 
 interface Subscription {
   id: number;
   plan: string;
-  price: string;
+  price: number;
   status: string;
   subscribed_at: string;
 }
@@ -26,13 +27,18 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
 
+  // Fetch logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
         const data = await res.json();
-        if (!data.loggedIn) router.push("/auth");
-        else setUser(data.user);
+
+        if (!data.loggedIn) {
+          router.push("/auth");
+        } else {
+          setUser(data.user);
+        }
       } catch {
         router.push("/auth");
       }
@@ -40,6 +46,7 @@ export default function DashboardPage() {
     fetchUser();
   }, [router]);
 
+  // Fetch user subscription
   useEffect(() => {
     if (!user) return;
 
@@ -47,9 +54,12 @@ export default function DashboardPage() {
       try {
         const res = await fetch(`${API_BASE}/subscriptions/${user.id}`);
         const data = await res.json();
-        if (data.success) setSubscription(data.subscription);
+
+        if (data.success) {
+          setSubscription(data.subscription);
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Dashboard fetch subscription error:", err);
       } finally {
         setLoading(false);
       }
@@ -68,9 +78,8 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <SimpleHeader />
-
       <main className="container mx-auto px-4 py-12 max-w-3xl">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-8 text-white">Dashboard</h1>
 
         {subscription ? (
           <Card className="mb-6">
@@ -94,11 +103,14 @@ export default function DashboardPage() {
                   {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
                 </span>
               </p>
-              <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleDateString()}</p>
+              <p>
+                <strong>Subscribed At:</strong>{" "}
+                {new Date(subscription.subscribed_at).toLocaleDateString()}
+              </p>
             </CardContent>
           </Card>
         ) : (
-          <p>You have no subscriptions.</p>
+          <p className="text-white">You have no subscriptions. Choose a membership to subscribe.</p>
         )}
       </main>
     </div>

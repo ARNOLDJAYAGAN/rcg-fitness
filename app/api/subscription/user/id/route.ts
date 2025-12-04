@@ -3,7 +3,7 @@ import { pool } from "@/lib/db";
 
 export async function GET(req: NextRequest, { params }: { params: { userId: string } }) {
   const { userId } = params;
-  if (!userId) return NextResponse.json({ success: false, message: "Missing userId" });
+  if (!userId) return NextResponse.json({ success: false, message: "Missing userId" }, { status: 400 });
 
   try {
     const result = await pool.query(
@@ -12,15 +12,15 @@ export async function GET(req: NextRequest, { params }: { params: { userId: stri
        WHERE user_id = $1
        ORDER BY subscribed_at DESC
        LIMIT 1`,
-      [parseInt(userId)]
+      [parseInt(userId, 10)]
     );
 
     return NextResponse.json({
       success: true,
-      subscription: result.rows[0] || null
+      subscription: result.rows[0] || null,
     });
   } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ success: false, message: err.message });
+    console.error("GET subscription error:", err);
+    return NextResponse.json({ success: false, message: err.message || "Server error" }, { status: 500 });
   }
 }
