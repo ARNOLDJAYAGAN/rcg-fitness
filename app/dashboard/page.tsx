@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
     const fetchSubscription = async () => {
       try {
-        const res = await fetch(`${API_BASE}/subscriptions/${user.id}`);
+        const res = await fetch(`${API_BASE}/subscription/${user.id}`);
         const data = await res.json();
 
         if (data.success) {
