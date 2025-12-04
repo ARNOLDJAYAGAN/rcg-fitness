@@ -1,3 +1,4 @@
+// app/admin/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -21,7 +22,6 @@ export default function AdminPage() {
   const [processingId, setProcessingId] = useState<number | null>(null);
 
   const fetchSubscriptions = async () => {
-    setLoading(true);
     try {
       const res = await fetch("/api/subscriptions/admin");
       const data = await res.json();
@@ -91,17 +91,13 @@ export default function AdminPage() {
                     className={`px-2 py-0.5 rounded-full text-sm font-medium ${
                       sub.status === "active"
                         ? "bg-green-500/20 text-green-500"
-                        : sub.status === "pending"
-                        ? "bg-yellow-500/20 text-yellow-500"
-                        : "bg-red-500/20 text-red-500"
+                        : "bg-yellow-500/20 text-yellow-500"
                     }`}
                   >
                     {sub.status}
                   </span>
                 </td>
-                <td className="px-4 py-2">
-                  {new Date(sub.subscribed_at).toLocaleDateString()}
-                </td>
+                <td className="px-4 py-2">{new Date(sub.subscribed_at).toLocaleDateString()}</td>
                 <td className="px-4 py-2">
                   {sub.status === "pending" ? (
                     <Button

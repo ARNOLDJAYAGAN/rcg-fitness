@@ -1,3 +1,4 @@
+// app/dashboard/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -15,7 +16,7 @@ interface User {
 interface Subscription {
   id: number;
   plan: string;
-  price: number;
+  price: string;
   status: string;
   subscribed_at: string;
 }
@@ -24,9 +25,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
 
-  // Fetch logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -41,23 +41,20 @@ export default function DashboardPage() {
     fetchUser();
   }, [router]);
 
-  // Fetch user subscriptions
   useEffect(() => {
     if (!user) return;
-
-    const fetchSubscriptions = async () => {
+    const fetchSubscription = async () => {
       try {
-        const res = await fetch(`${API_BASE}/subscriptions/user/${user.id}`);
+        const res = await fetch(`${API_BASE}/subscriptions/${user.id}`);
         const data = await res.json();
-        if (data.success) setSubscriptions(data.subscriptions);
+        if (data.success) setSubscription(data.subscription);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchSubscriptions();
+    fetchSubscription();
   }, [user]);
 
   if (loading)
@@ -70,43 +67,35 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <SimpleHeader />
-
       <main className="container mx-auto px-4 py-24 max-w-6xl">
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-
-        {subscriptions.length === 0 ? (
-          <p>You have no subscriptions yet.</p>
+        {subscription ? (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Your Subscription</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p><strong>Plan:</strong> {subscription.plan}</p>
+              <p><strong>Price:</strong> ₱{subscription.price}/month</p>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span
+                  className={
+                    subscription.status === "active"
+                      ? "text-green-600"
+                      : subscription.status === "pending"
+                      ? "text-yellow-600"
+                      : "text-red-600"
+                  }
+                >
+                  {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
+                </span>
+              </p>
+              <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleDateString()}</p>
+            </CardContent>
+          </Card>
         ) : (
-          subscriptions.map((subscription) => (
-            <Card key={subscription.id} className="mb-6">
-              <CardHeader>
-                <CardTitle>{subscription.plan} Plan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  <strong>Price:</strong> ₱{subscription.price}/month
-                </p>
-                <p>
-                  <strong>Status:</strong>{" "}
-                  <span
-                    className={
-                      subscription.status === "active"
-                        ? "text-green-600"
-                        : subscription.status === "pending"
-                        ? "text-yellow-600"
-                        : "text-red-600"
-                    }
-                  >
-                    {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
-                  </span>
-                </p>
-                <p>
-                  <strong>Subscribed At:</strong>{" "}
-                  {new Date(subscription.subscribed_at).toLocaleDateString()}
-                </p>
-              </CardContent>
-            </Card>
-          ))
+          <p>You have no subscriptions yet.</p>
         )}
       </main>
     </div>
