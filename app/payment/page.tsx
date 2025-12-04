@@ -5,12 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle } from "lucide-react";
-import { API_BASE } from "@/lib/api";
 import { SimpleHeader } from "@/components/simple-header";
+import { API_BASE } from "@/lib/api";
 
 export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const [user, setUser] = useState<{ id: number; email: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
@@ -20,6 +21,7 @@ export default function PaymentPage() {
   const plan = searchParams.get("plan") || "Premium";
   const price = searchParams.get("price") || "1499";
 
+  // Fetch logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -37,38 +39,28 @@ export default function PaymentPage() {
   }, [router]);
 
   const handleDone = async () => {
-    if (!user) return;
-    if (!phone.trim() || !name.trim()) {
+    if (!user || !phone.trim() || !name.trim()) {
       alert("Please fill in all fields");
       return;
     }
 
     setLoading(true);
-
     try {
       const res = await fetch(`${API_BASE}/subscriptions/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           user_id: user.id,
           plan,
-          price,
+          price: parseFloat(price),
           phone,
           name,
-          status: "pending",
         }),
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Subscription API error:", text);
-        alert("Failed to create subscription");
-        setLoading(false);
-        return;
-      }
-
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
+      if (!data.success) throw new Error(data.message || "Failed to create subscription");
 
       setSuccess(true);
       setTimeout(() => router.push("/dashboard"), 1500);
@@ -79,13 +71,18 @@ export default function PaymentPage() {
     }
   };
 
-  if (loading) return <Loader2 className="animate-spin w-8 h-8 mx-auto my-20" />;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin w-8 h-8 text-primary" />
+      </div>
+    );
 
   if (success)
     return (
-      <div className="text-center py-20">
-        <CheckCircle className="mx-auto w-16 h-16 text-green-500" />
-        <h2 className="text-2xl font-bold mt-4">Subscription Pending!</h2>
+      <div className="min-h-screen flex flex-col items-center justify-center text-center">
+        <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
+        <h2 className="text-2xl font-bold">Subscription Pending!</h2>
         <p>Redirecting to dashboard...</p>
       </div>
     );
@@ -101,18 +98,23 @@ export default function PaymentPage() {
           <CardContent>
             <p className="text-3xl font-bold text-primary mb-4">₱{price}/month</p>
             <input
-              className="w-full border p-2 mb-4 rounded"
-              placeholder="Your Full Name"
+              type="text"
+              placeholder="Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="w-full border p-2 mb-4 rounded"
             />
             <input
-              className="w-full border p-2 mb-4 rounded"
+              type="text"
               placeholder="Phone Number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              className="w-full border p-2 mb-4 rounded"
             />
-            <Button onClick={handleDone} className="w-full bg-primary text-white py-3">
+            <Button
+              onClick={handleDone}
+              className="w-full bg-primary text-white py-3 font-semibold hover:bg-primary/90"
+            >
               Done
             </Button>
           </CardContent>
