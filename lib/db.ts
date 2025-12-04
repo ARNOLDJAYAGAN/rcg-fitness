@@ -1,9 +1,8 @@
 import pkg from "pg";
 const { Pool } = pkg;
 
-// Use your Neon database URL from .env
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.NEON_DB_URL, // use the correct env var
   ssl: {
     rejectUnauthorized: false, // Neon requires SSL
   },
