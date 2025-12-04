@@ -6,10 +6,10 @@ export function SimpleHeader() {
   const router = useRouter();
 
   return (
-    <header className="bg-background border-b border-border py-4 px-6 text-center">
+    <header className="bg-black text-white p-4">
       <h1
-        className="text-2xl font-bold text-primary cursor-pointer"
-        onClick={() => router.push("/")}
+        className="text-xl font-bold cursor-pointer"
+        onClick={() => router.push("/app")}
       >
         RCG Fitness
       </h1>

@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle } from "lucide-react";
 import { API_BASE } from "@/lib/api";
+import { SimpleHeader } from "@/components/simple-header";
 
 export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const [user, setUser] = useState<{ id: number; email: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
@@ -44,6 +44,7 @@ export default function PaymentPage() {
     }
 
     setLoading(true);
+
     try {
       const res = await fetch(`${API_BASE}/subscriptions/create`, {
         method: "POST",
@@ -52,13 +53,22 @@ export default function PaymentPage() {
           user_id: user.id,
           plan,
           price,
-          name,
           phone,
+          name,
+          status: "pending",
         }),
       });
 
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Subscription API error:", text);
+        alert("Failed to create subscription");
+        setLoading(false);
+        return;
+      }
+
       const data = await res.json();
-      if (!data.success) throw new Error(data.message || "Failed to create subscription");
+      if (!data.success) throw new Error(data.message);
 
       setSuccess(true);
       setTimeout(() => router.push("/dashboard"), 1500);
@@ -82,6 +92,7 @@ export default function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SimpleHeader />
       <main className="container mx-auto px-4 py-24 max-w-lg">
         <Card className="mb-6">
           <CardHeader>
@@ -90,18 +101,16 @@ export default function PaymentPage() {
           <CardContent>
             <p className="text-3xl font-bold text-primary mb-4">₱{price}/month</p>
             <input
-              type="text"
-              placeholder="Full Name"
+              className="w-full border p-2 mb-4 rounded"
+              placeholder="Your Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border p-2 mb-4"
             />
             <input
-              type="text"
+              className="w-full border p-2 mb-4 rounded"
               placeholder="Phone Number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full border p-2 mb-4"
             />
             <Button onClick={handleDone} className="w-full bg-primary text-white py-3">
               Done

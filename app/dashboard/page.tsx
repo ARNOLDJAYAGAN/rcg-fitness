@@ -5,21 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { API_BASE } from "@/lib/api";
-
-// SimpleHeader Component
-function SimpleHeader() {
-  const router = useRouter();
-  return (
-    <header className="bg-white shadow p-4">
-      <h1
-        className="text-2xl font-bold cursor-pointer"
-        onClick={() => router.push("/")}
-      >
-        RCG Fitness
-      </h1>
-    </header>
-  );
-}
+import { SimpleHeader } from "@/components/simple-header";
 
 interface User {
   id: number;
@@ -40,7 +26,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
 
-  // Fetch logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -55,7 +40,6 @@ export default function DashboardPage() {
     fetchUser();
   }, [router]);
 
-  // Fetch user's latest subscription
   useEffect(() => {
     if (!user) return;
 
@@ -76,7 +60,7 @@ export default function DashboardPage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="animate-spin w-8 h-8 text-primary" />
       </div>
     );
@@ -85,7 +69,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background">
       <SimpleHeader />
 
-      <main className="container mx-auto px-4 py-24 max-w-6xl">
+      <main className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
 
         {subscription ? (
@@ -110,14 +94,11 @@ export default function DashboardPage() {
                   {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
                 </span>
               </p>
-              <p>
-                <strong>Subscribed At:</strong>{" "}
-                {new Date(subscription.subscribed_at).toLocaleDateString()}
-              </p>
+              <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleDateString()}</p>
             </CardContent>
           </Card>
         ) : (
-          <p>You have no subscriptions. Click “RCG Fitness” above to choose a plan.</p>
+          <p>You have no subscriptions.</p>
         )}
       </main>
     </div>
