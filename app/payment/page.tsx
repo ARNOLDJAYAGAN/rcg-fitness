@@ -40,14 +40,12 @@ export default function PaymentPage() {
   // Handle subscription "Done" click
   const handleDone = async () => {
     if (!user) return;
-
     if (!phone.trim() || !name.trim()) {
       alert("Please fill in all fields");
       return;
     }
 
     setLoading(true);
-
     try {
       const res = await fetch(`${API_BASE}/subscriptions/create`, {
         method: "POST",
