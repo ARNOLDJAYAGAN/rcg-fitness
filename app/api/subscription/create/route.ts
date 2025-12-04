@@ -1,13 +1,22 @@
-// app/api/subscriptions/create/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { user_id, plan, price, name, phone } = body;
+    const bodyText = await req.text();
 
-    // Validate fields
+    let data;
+    try {
+      data = JSON.parse(bodyText);
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Invalid JSON body" },
+        { status: 400 }
+      );
+    }
+
+    const { user_id, plan, price, name, phone } = data;
+
     if (!user_id || !plan || !price || !name || !phone) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
@@ -15,14 +24,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Insert into DB
     await pool.query(
       `INSERT INTO subscriptions (user_id, plan, price, name, phone, status)
        VALUES ($1, $2, $3, $4, $5, 'pending')`,
       [user_id, plan, parseFloat(price), name, phone]
     );
 
-    return NextResponse.json({ success: true, message: "Subscription created" });
+    return NextResponse.json({
+      success: true,
+      message: "Subscription created successfully",
+    });
   } catch (err: any) {
     console.error("Subscription create error:", err);
     return NextResponse.json(
