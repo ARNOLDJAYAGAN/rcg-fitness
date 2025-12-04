@@ -46,18 +46,19 @@ export default function PaymentPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/subscriptions/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          user_id: user.id,
-          plan,
-          price: parseFloat(price),
-          phone,
-          name,
-        }),
-      });
+     const res = await fetch(`${API_BASE}/api/subscriptions/create`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({
+    user_id: user.id,
+    plan,
+    price: parseFloat(price),
+    phone,
+    name,
+  }),
+});
+
 
       const data = await res.json();
       if (!data.success) throw new Error(data.message || "Failed to create subscription");
