@@ -6,23 +6,18 @@ export async function POST(req: NextRequest) {
     const { user_id, plan, price, name, phone } = await req.json();
 
     if (!user_id || !plan || !price || !name || !phone) {
-      return NextResponse.json({ success: false, message: "Missing fields" });
+      return NextResponse.json({ success: false, message: "Missing fields" }, { status: 400 });
     }
 
-    const result = await pool.query(
-      `INSERT INTO subscriptions (user_id, plan, price, name, phone, status, subscribed_at)
-       VALUES ($1, $2, $3, $4, $5, 'pending', NOW())
-       RETURNING id`,
+    await pool.query(
+      `INSERT INTO subscriptions (user_id, plan, price, name, phone, status)
+       VALUES ($1, $2, $3, $4, $5, 'pending')`,
       [user_id, plan, price, name, phone]
     );
 
-    return NextResponse.json({ success: true, id: result.rows[0].id });
-
+    return NextResponse.json({ success: true, message: "Subscription created" });
   } catch (err: any) {
-    console.error("SERVER ERROR:", err);  // THIS WILL SHOW THE REAL ERROR
-    return NextResponse.json({
-      success: false,
-      message: err.message || "Server error",
-    });
+    console.error(err);
+    return NextResponse.json({ success: false, message: err.message || "Server error" }, { status: 500 });
   }
 }
