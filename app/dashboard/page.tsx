@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { API_BASE } from "@/lib/api";
-import { SimpleHeader } from "@/components/simple-header";
 
 interface User {
   id: number;
@@ -43,6 +41,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!user) return;
+
     const fetchSubscription = async () => {
       try {
         const res = await fetch(`${API_BASE}/subscriptions/${user.id}`);
@@ -54,6 +53,7 @@ export default function DashboardPage() {
         setLoading(false);
       }
     };
+
     fetchSubscription();
   }, [user]);
 
@@ -66,9 +66,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SimpleHeader />
       <main className="container mx-auto px-4 py-24 max-w-6xl">
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+
         {subscription ? (
           <Card className="mb-6">
             <CardHeader>
@@ -95,7 +95,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <p>You have no subscriptions yet.</p>
+          <p>You have no subscriptions.</p>
         )}
       </main>
     </div>

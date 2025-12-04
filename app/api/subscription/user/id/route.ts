@@ -12,12 +12,12 @@ export async function GET(req: NextRequest, { params }: { params: { userId: stri
        WHERE user_id = $1
        ORDER BY subscribed_at DESC
        LIMIT 1`,
-      [parseInt(userId, 10)] // convert to integer
+      [parseInt(userId, 10)]
     );
 
     return NextResponse.json({
       success: true,
-      subscription: result.rows[0] || null
+      subscription: result.rows[0] || null,
     });
   } catch (err: any) {
     console.error(err);
