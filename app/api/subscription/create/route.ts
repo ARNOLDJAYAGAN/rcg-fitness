@@ -9,36 +9,25 @@ export async function POST(req: NextRequest) {
     try {
       data = JSON.parse(bodyText);
     } catch {
-      return NextResponse.json(
-        { success: false, message: "Invalid JSON body" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "Invalid JSON body" }, { status: 400 });
     }
 
     const { user_id, plan, price, name, phone } = data;
 
     if (!user_id || !plan || !price || !name || !phone) {
-      return NextResponse.json(
-        { success: false, message: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
 
-    await pool.query(
+    // Insert subscription into database
+    const result = await pool.query(
       `INSERT INTO subscriptions (user_id, plan, price, name, phone, status)
-       VALUES ($1, $2, $3, $4, $5, 'pending')`,
+       VALUES ($1, $2, $3, $4, $5, 'pending') RETURNING *`,
       [user_id, plan, parseFloat(price), name, phone]
     );
 
-    return NextResponse.json({
-      success: true,
-      message: "Subscription created successfully",
-    });
+    return NextResponse.json({ success: true, subscription: result.rows[0] });
   } catch (err: any) {
     console.error("Subscription create error:", err);
-    return NextResponse.json(
-      { success: false, message: err.message || "Server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: err.message || "Server error" }, { status: 500 });
   }
 }

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: { userId: stri
        WHERE user_id = $1
        ORDER BY subscribed_at DESC
        LIMIT 1`,
-      [parseInt(userId, 10)]
+      [parseInt(userId)]
     );
 
     return NextResponse.json({
