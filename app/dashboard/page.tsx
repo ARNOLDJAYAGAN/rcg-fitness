@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { API_BASE } from "@/lib/api";
 import { SimpleHeader } from "@/components/simple-header";
@@ -16,7 +15,7 @@ interface User {
 interface Subscription {
   id: number;
   plan: string;
-  price: string;
+  price: number;
   status: string;
   subscribed_at: string;
 }
@@ -25,8 +24,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
 
+  // Fetch logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -41,20 +41,23 @@ export default function DashboardPage() {
     fetchUser();
   }, [router]);
 
+  // Fetch user subscriptions
   useEffect(() => {
     if (!user) return;
-    const fetchSubscription = async () => {
+
+    const fetchSubscriptions = async () => {
       try {
-        const res = await fetch(`${API_BASE}/subscriptions/${user.id}`);
+        const res = await fetch(`${API_BASE}/subscriptions/user/${user.id}`);
         const data = await res.json();
-        if (data.success) setSubscription(data.subscription);
+        if (data.success) setSubscriptions(data.subscriptions);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchSubscription();
+
+    fetchSubscriptions();
   }, [user]);
 
   if (loading)
@@ -71,33 +74,39 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-24 max-w-6xl">
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
 
-        {subscription ? (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Your Subscription</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p><strong>Plan:</strong> {subscription.plan}</p>
-              <p><strong>Price:</strong> ₱{subscription.price}/month</p>
-              <p>
-                <strong>Status:</strong>{" "}
-                <span
-                  className={
-                    subscription.status === "active"
-                      ? "text-green-600"
-                      : subscription.status === "pending"
-                      ? "text-yellow-600"
-                      : "text-red-600"
-                  }
-                >
-                  {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
-                </span>
-              </p>
-              <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleDateString()}</p>
-            </CardContent>
-          </Card>
+        {subscriptions.length === 0 ? (
+          <p>You have no subscriptions yet.</p>
         ) : (
-          <p>You have no active subscriptions.</p>
+          subscriptions.map((subscription) => (
+            <Card key={subscription.id} className="mb-6">
+              <CardHeader>
+                <CardTitle>{subscription.plan} Plan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>
+                  <strong>Price:</strong> ₱{subscription.price}/month
+                </p>
+                <p>
+                  <strong>Status:</strong>{" "}
+                  <span
+                    className={
+                      subscription.status === "active"
+                        ? "text-green-600"
+                        : subscription.status === "pending"
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                    }
+                  >
+                    {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
+                  </span>
+                </p>
+                <p>
+                  <strong>Subscribed At:</strong>{" "}
+                  {new Date(subscription.subscribed_at).toLocaleDateString()}
+                </p>
+              </CardContent>
+            </Card>
+          ))
         )}
       </main>
     </div>

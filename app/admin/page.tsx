@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 interface Subscription {
   id: number;
@@ -17,12 +16,12 @@ interface Subscription {
 }
 
 export default function AdminPage() {
-  const router = useRouter();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
 
   const fetchSubscriptions = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/subscriptions/admin");
       const data = await res.json();
@@ -62,21 +61,11 @@ export default function AdminPage() {
     }
   };
 
-  if (loading)
-    return <Loader2 className="animate-spin w-8 h-8 mx-auto my-20" />;
+  if (loading) return <Loader2 className="animate-spin w-8 h-8 mx-auto my-20" />;
 
   return (
-    <div className="min-h-screen p-8 bg-background">
-      {/* Simple clickable header */}
-      <h1
-        className="text-3xl font-bold mb-8 cursor-pointer text-primary"
-        onClick={() => router.push("/app")}
-      >
-        RCG Fitness
-      </h1>
-
-      <h2 className="text-2xl font-semibold mb-6">Subscription Management</h2>
-
+    <div className="min-h-screen p-8">
+      <h1 className="text-3xl font-bold mb-6">Subscription Management</h1>
       <div className="overflow-x-auto">
         <table className="w-full table-auto border">
           <thead>
@@ -129,9 +118,7 @@ export default function AdminPage() {
                       Approve
                     </Button>
                   ) : (
-                    <span className="text-green-500 font-medium">
-                      {sub.status === "active" ? "Approved" : "Inactive"}
-                    </span>
+                    <span className="text-green-500 font-medium">Approved</span>
                   )}
                 </td>
               </tr>
