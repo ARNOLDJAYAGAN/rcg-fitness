@@ -6,6 +6,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { API_BASE } from "@/lib/api";
 
+// SimpleHeader Component
+function SimpleHeader() {
+  const router = useRouter();
+  return (
+    <header className="bg-white shadow p-4">
+      <h1
+        className="text-2xl font-bold cursor-pointer"
+        onClick={() => router.push("/")}
+      >
+        RCG Fitness
+      </h1>
+    </header>
+  );
+}
+
 interface User {
   id: number;
   email: string;
@@ -25,6 +40,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
 
+  // Fetch logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -39,6 +55,7 @@ export default function DashboardPage() {
     fetchUser();
   }, [router]);
 
+  // Fetch user's latest subscription
   useEffect(() => {
     if (!user) return;
 
@@ -66,6 +83,8 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SimpleHeader />
+
       <main className="container mx-auto px-4 py-24 max-w-6xl">
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
 
@@ -91,11 +110,14 @@ export default function DashboardPage() {
                   {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
                 </span>
               </p>
-              <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleDateString()}</p>
+              <p>
+                <strong>Subscribed At:</strong>{" "}
+                {new Date(subscription.subscribed_at).toLocaleDateString()}
+              </p>
             </CardContent>
           </Card>
         ) : (
-          <p>You have no subscriptions.</p>
+          <p>You have no subscriptions. Click “RCG Fitness” above to choose a plan.</p>
         )}
       </main>
     </div>
