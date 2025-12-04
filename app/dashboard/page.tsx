@@ -65,6 +65,7 @@ export default function DashboardPage() {
       try {
         const res = await fetch(`${API_BASE}/subscription/${user.id}`);
 
+
         if (!res.ok) {
           setSubscription(null);
           setLoading(false);
