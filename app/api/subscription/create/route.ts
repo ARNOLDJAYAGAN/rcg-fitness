@@ -1,26 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
-export async function GET(req: NextRequest, { params }: { params: { userId: string } }) {
-  const { userId } = params;
-  if (!userId) return NextResponse.json({ success: false, message: "Missing userId" });
-
+export async function POST(req: NextRequest) {
   try {
-    const result = await pool.query(
-      `SELECT id, plan, price, status, subscribed_at
-       FROM subscriptions
-       WHERE user_id = $1
-       ORDER BY subscribed_at DESC
-       LIMIT 1`,
-      [parseInt(userId, 10)]
+    const { user_id, plan, price, name, phone } = await req.json();
+
+    // Validate required fields
+    if (!user_id || !plan || !price || !name || !phone) {
+      return NextResponse.json({ success: false, message: "Missing fields" }, { status: 400 });
+    }
+
+    // Ensure price is a number
+    const numericPrice = parseFloat(price);
+
+    await pool.query(
+      `INSERT INTO subscriptions (user_id, plan, price, name, phone, status)
+       VALUES ($1, $2, $3, $4, $5, 'pending')`,
+      [user_id, plan, numericPrice, name, phone]
     );
 
-    return NextResponse.json({
-      success: true,
-      subscription: result.rows[0] || null
-    });
+    return NextResponse.json({ success: true, message: "Subscription created" });
   } catch (err: any) {
     console.error(err);
-    return NextResponse.json({ success: false, message: err.message });
+    return NextResponse.json({ success: false, message: err.message || "Server error" }, { status: 500 });
   }
 }

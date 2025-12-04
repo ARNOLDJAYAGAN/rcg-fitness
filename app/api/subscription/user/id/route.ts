@@ -17,7 +17,7 @@ export async function GET(req: NextRequest, { params }: { params: { userId: stri
 
     return NextResponse.json({
       success: true,
-      subscription: result.rows[0] || null,
+      subscription: result.rows[0] || null
     });
   } catch (err: any) {
     console.error(err);
