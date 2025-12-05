@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -10,29 +10,12 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Optional: redirect if already logged in
-  useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const res = await fetch("/api/admin-check", { credentials: "include" });
-        const data = await res.json();
-        if (data.loggedIn) {
-          router.replace("/admin"); // already logged in
-        }
-      } catch (err) {
-        console.error("Check admin login error:", err);
-      }
-    };
-    checkAdmin();
-  }, [router]);
-
   const handleLogin = async () => {
     setLoading(true);
 
     try {
       const res = await fetch("/api/admin-login", {
         method: "POST",
-        credentials: "include", // Required to receive cookie
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim(),
