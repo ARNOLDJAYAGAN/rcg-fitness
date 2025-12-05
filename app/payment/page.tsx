@@ -119,7 +119,7 @@ export default function PaymentPage() {
               <p className="text-white mb-2">Scan QR Code to Pay:</p>
               <div className="border border-gray-700 rounded p-4 flex justify-center items-center bg-gray-900">
                 <img
-                  src="/images/qr-placeholder.png" // replace with your actual QR code path
+                  src="/images/kashg.png" // replace with your actual QR code path
                   alt="Payment QR Code"
                   className="w-48 h-48 object-contain"
                 />

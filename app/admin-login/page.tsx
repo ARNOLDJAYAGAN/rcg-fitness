@@ -12,11 +12,16 @@ export default function AdminLoginPage() {
 
   const handleLogin = async () => {
     setLoading(true);
+
     try {
       const res = await fetch("/api/admin-login", {
         method: "POST",
+        credentials: "include", // 🔥 REQUIRED FOR COOKIES
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password.trim(),
+        }),
       });
 
       const data = await res.json();
@@ -27,7 +32,9 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push("/admin"); // redirect to admin dashboard
+      // Success → redirect
+      router.push("/admin");
+
     } catch (err) {
       console.error(err);
       alert("Login failed");
@@ -38,7 +45,10 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-6 text-white text-center">Admin Login</h2>
+        <h2 className="text-2xl font-bold mb-6 text-white text-center">
+          Admin Login
+        </h2>
+
         <input
           type="email"
           placeholder="Email"
@@ -46,6 +56,7 @@ export default function AdminLoginPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-full mb-4 p-2 rounded"
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -53,7 +64,12 @@ export default function AdminLoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full mb-6 p-2 rounded"
         />
-        <Button onClick={handleLogin} className="w-full" disabled={loading}>
+
+        <Button
+          onClick={handleLogin}
+          className="w-full"
+          disabled={loading}
+        >
           {loading ? "Logging in..." : "Login"}
         </Button>
       </div>
