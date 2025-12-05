@@ -4,7 +4,7 @@ import { pool } from "@/lib/db";
 export async function GET() {
   try {
     const result = await pool.query(
-      `SELECT id, user_id, name, phone, plan, price, status, subscribed_at
+      `SELECT id, user_id, name, email, phone, plan, price, status, subscribed_at
        FROM subscriptions
        ORDER BY subscribed_at DESC`
     );
