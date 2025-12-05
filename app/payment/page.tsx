@@ -52,6 +52,7 @@ export default function PaymentPage() {
         credentials: "include",
         body: JSON.stringify({
           user_id: user.id,
+          email: user.email, // added email
           plan,
           price: parseFloat(price),
           phone,
@@ -73,14 +74,14 @@ export default function PaymentPage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin w-8 h-8 text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <Loader2 className="animate-spin w-10 h-10 text-orange-500" />
       </div>
     );
 
   if (success)
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center text-center bg-black text-white">
         <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
         <h2 className="text-2xl font-bold">Subscription Pending!</h2>
         <p>Redirecting to dashboard...</p>
@@ -88,15 +89,15 @@ export default function PaymentPage() {
     );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-black text-white">
       <SimpleHeader />
       <main className="container mx-auto px-4 py-24 max-w-lg">
-        <Card className="mb-6">
+        <Card className="mb-6 bg-gray-900 border border-gray-700">
           <CardHeader>
-            <CardTitle>Selected Plan: {plan}</CardTitle>
+            <CardTitle className="text-orange-500">Selected Plan: {plan}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-primary mb-4">₱{price}/month</p>
+            <p className="text-3xl font-bold text-orange-500 mb-4">₱{price}/month</p>
 
             {/* USER INFO */}
             <input
@@ -104,22 +105,22 @@ export default function PaymentPage() {
               placeholder="Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border p-2 mb-4 rounded"
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 mb-4 rounded"
             />
             <input
               type="text"
               placeholder="Phone Number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full border p-2 mb-4 rounded"
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 mb-4 rounded"
             />
 
-            {/* QR CODE / IMAGE SECTION */}
+            {/* QR CODE / IMAGE */}
             <div className="mb-4">
               <p className="text-white mb-2">Scan QR Code to Pay:</p>
-              <div className="border border-gray-700 rounded p-4 flex justify-center items-center bg-gray-900">
+              <div className="border border-gray-700 rounded p-4 flex justify-center items-center bg-gray-800">
                 <img
-                  src="/images/kashg.png" // replace with your actual QR code path
+                  src="/images/kashg.jpg"
                   alt="Payment QR Code"
                   className="w-48 h-48 object-contain"
                 />
@@ -128,7 +129,7 @@ export default function PaymentPage() {
 
             <Button
               onClick={handleDone}
-              className="w-full bg-primary text-white py-3 font-semibold hover:bg-primary/90"
+              className="w-full bg-orange-500 text-black py-3 font-semibold hover:bg-orange-600"
             >
               Done
             </Button>
