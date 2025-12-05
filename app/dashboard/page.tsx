@@ -20,6 +20,7 @@ interface Subscription {
   price: number;
   status: string;
   subscribed_at: string;
+  expires_at: string;
 }
 
 export default function DashboardPage() {
@@ -99,7 +100,7 @@ export default function DashboardPage() {
       }
 
       alert("Account deleted successfully.");
-      router.push("/auth"); // redirect to login/signup page
+      router.push("/auth");
     } catch (err) {
       console.error(err);
       alert("An error occurred. Please try again.");
@@ -111,7 +112,6 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      // Delete the JWT cookie
       await fetch("/api/logout", { method: "POST", credentials: "include" });
       router.push("/auth");
     } catch (err) {
@@ -172,6 +172,7 @@ export default function DashboardPage() {
                   <p><strong>Plan:</strong> {subscription.plan}</p>
                   <p><strong>Price:</strong> ₱{subscription.price}/month</p>
                   <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleString()}</p>
+                  <p><strong>Expires At:</strong> {new Date(subscription.expires_at).toLocaleString()}</p>
                 </CardContent>
               </Card>
             )}
@@ -180,7 +181,7 @@ export default function DashboardPage() {
           <p className="text-white mb-4">You have no subscriptions. Choose a membership to get started.</p>
         )}
 
-        {/* BUTTONS */}
+        {/* DELETE ACCOUNT & LOGOUT BUTTONS */}
         <div className="flex gap-4 mt-4">
           <Button
             onClick={handleDeleteAccount}
