@@ -40,7 +40,8 @@ export function Header() {
   }
 
   return (
-    <header className="flex flex-col md:flex-row justify-between items-center px-8 py-4 border-b border-gray-200 bg-background">
+    <header className="flex flex-col md:flex-row justify-between items-center px-8 py-4 bg-background">
+
       {/* Logo */}
       <h1
         className="text-3xl font-bold text-primary cursor-pointer"
