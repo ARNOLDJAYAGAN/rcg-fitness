@@ -69,55 +69,57 @@ export default function AdminDashboard() {
   };
 
   if (loading)
-    return <Loader2 className="animate-spin w-10 h-10 mx-auto mt-20 text-gray-500" />;
+    return <Loader2 className="animate-spin w-10 h-10 mx-auto mt-20 text-orange-500" />;
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Subscription Management</h1>
+    <div className="min-h-screen p-8 bg-black">
+      <h1 className="text-3xl font-bold mb-6 text-orange-500">
+        Subscription Management
+      </h1>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
-          <thead className="bg-gray-100 text-left">
+        <table className="min-w-full bg-gray-900 shadow-md rounded-lg overflow-hidden border border-gray-700">
+          <thead className="bg-gray-800 text-left">
             <tr>
-              <th className="px-6 py-3 text-gray-700 font-semibold">Name</th>
-              <th className="px-6 py-3 text-gray-700 font-semibold">Email</th>
-              <th className="px-6 py-3 text-gray-700 font-semibold">Phone</th>
-              <th className="px-6 py-3 text-gray-700 font-semibold">Plan</th>
-              <th className="px-6 py-3 text-gray-700 font-semibold">Price</th>
-              <th className="px-6 py-3 text-gray-700 font-semibold">Status</th>
-              <th className="px-6 py-3 text-gray-700 font-semibold">Subscribed At</th>
-              <th className="px-6 py-3 text-gray-700 font-semibold">Action</th>
+              <th className="px-6 py-3 text-gray-200 font-semibold">Name</th>
+              <th className="px-6 py-3 text-gray-200 font-semibold">Email</th>
+              <th className="px-6 py-3 text-gray-200 font-semibold">Phone</th>
+              <th className="px-6 py-3 text-gray-200 font-semibold">Plan</th>
+              <th className="px-6 py-3 text-gray-200 font-semibold">Price</th>
+              <th className="px-6 py-3 text-gray-200 font-semibold">Status</th>
+              <th className="px-6 py-3 text-gray-200 font-semibold">Subscribed At</th>
+              <th className="px-6 py-3 text-gray-200 font-semibold">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-700">
             {subscriptions.map((sub) => (
-              <tr key={sub.id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4 text-gray-800">{sub.name}</td>
-                <td className="px-6 py-4 text-gray-800">{sub.email}</td>
-                <td className="px-6 py-4 text-gray-800">{sub.phone}</td>
-                <td className="px-6 py-4 font-semibold text-primary">{sub.plan}</td>
-                <td className="px-6 py-4 text-gray-800">₱{sub.price}</td>
+              <tr key={sub.id} className="hover:bg-gray-800 transition">
+                <td className="px-6 py-4 text-gray-100">{sub.name}</td>
+                <td className="px-6 py-4 text-gray-100">{sub.email}</td>
+                <td className="px-6 py-4 text-gray-100">{sub.phone}</td>
+                <td className="px-6 py-4 font-semibold text-orange-400">{sub.plan}</td>
+                <td className="px-6 py-4 text-gray-100">₱{sub.price}</td>
                 <td className="px-6 py-4">
                   <span
                     className={`px-2 py-1 rounded-full text-sm font-medium ${
                       sub.status === "active"
-                        ? "bg-green-100 text-green-800"
+                        ? "bg-green-600 text-white"
                         : sub.status === "pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-yellow-500 text-black"
+                        : "bg-gray-700 text-gray-200"
                     }`}
                   >
                     {sub.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-gray-800">
+                <td className="px-6 py-4 text-gray-100">
                   {new Date(sub.subscribed_at).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4">
                   {sub.status === "pending" ? (
                     <Button
                       size="sm"
-                      className="bg-primary text-white"
+                      className="bg-orange-500 text-black"
                       disabled={processingId === sub.id}
                       onClick={() => handleApprove(sub.id)}
                     >
@@ -129,7 +131,7 @@ export default function AdminDashboard() {
                       Approve
                     </Button>
                   ) : (
-                    <span className="text-green-600 font-medium">Approved</span>
+                    <span className="text-green-400 font-medium">Approved</span>
                   )}
                 </td>
               </tr>
