@@ -80,9 +80,7 @@ export default function DashboardPage() {
 
   // DELETE ACCOUNT FUNCTION
   const handleDeleteAccount = async () => {
-    if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) {
-      return;
-    }
+    if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) return;
 
     setDeleting(true);
 
@@ -91,9 +89,10 @@ export default function DashboardPage() {
         method: "DELETE",
         credentials: "include",
       });
+      const data = await res.json();
 
-      if (!res.ok) {
-        alert("Failed to delete account. Please try again.");
+      if (!res.ok || !data.success) {
+        alert(data?.error || "Failed to delete account. Please try again.");
         setDeleting(false);
         return;
       }
