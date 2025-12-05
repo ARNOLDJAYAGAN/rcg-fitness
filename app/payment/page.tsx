@@ -46,20 +46,18 @@ export default function PaymentPage() {
 
     setLoading(true);
     try {
-     const res = await fetch(`${API_BASE}/subscription/create`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",
-  body: JSON.stringify({
-    user_id: user.id,
-    plan,
-    price: parseFloat(price),
-    phone,
-    name,
-  }),
-});
-
-
+      const res = await fetch(`${API_BASE}/subscription/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          user_id: user.id,
+          plan,
+          price: parseFloat(price),
+          phone,
+          name,
+        }),
+      });
 
       const data = await res.json();
       if (!data.success) throw new Error(data.message || "Failed to create subscription");
@@ -99,6 +97,8 @@ export default function PaymentPage() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-primary mb-4">₱{price}/month</p>
+
+            {/* USER INFO */}
             <input
               type="text"
               placeholder="Full Name"
@@ -113,6 +113,19 @@ export default function PaymentPage() {
               onChange={(e) => setPhone(e.target.value)}
               className="w-full border p-2 mb-4 rounded"
             />
+
+            {/* QR CODE / IMAGE SECTION */}
+            <div className="mb-4">
+              <p className="text-white mb-2">Scan QR Code to Pay:</p>
+              <div className="border border-gray-700 rounded p-4 flex justify-center items-center bg-gray-900">
+                <img
+                  src="/images/qr-placeholder.png" // replace with your actual QR code path
+                  alt="Payment QR Code"
+                  className="w-48 h-48 object-contain"
+                />
+              </div>
+            </div>
+
             <Button
               onClick={handleDone}
               className="w-full bg-primary text-white py-3 font-semibold hover:bg-primary/90"
