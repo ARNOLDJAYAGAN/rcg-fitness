@@ -30,8 +30,9 @@ export default function DashboardPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  // Fetch user session (from your own backend)
+  // Fetch user session
   useEffect(() => {
     const getUser = async () => {
       try {
@@ -48,6 +49,8 @@ export default function DashboardPage() {
         setUser(data.user);
       } catch {
         router.push("/auth");
+      } finally {
+        setLoading(false);
       }
     };
     getUser();
@@ -62,7 +65,6 @@ export default function DashboardPage() {
         const res = await fetch(`${API_BASE}/subscription/${user.id}`);
         if (!res.ok) {
           setSubscription(null);
-          setLoading(false);
           return;
         }
         const data = await res.json();
@@ -70,44 +72,54 @@ export default function DashboardPage() {
         else setSubscription(null);
       } catch (err) {
         console.error("Failed to fetch subscription:", err);
-      } finally {
-        setLoading(false);
       }
     };
 
     getSubscription();
   }, [user]);
 
-  // DELETE ACCOUNT FUNCTION (plain DB deletion)
- // DELETE ACCOUNT FUNCTION
-const handleDeleteAccount = async () => {
-  if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) return;
+  // DELETE ACCOUNT FUNCTION
+  const handleDeleteAccount = async () => {
+    if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) return;
 
-  setDeleting(true);
+    setDeleting(true);
 
-  try {
-    const res = await fetch("/api/delete-account", {
-      method: "DELETE",
-      credentials: "include", // send cookies
-    });
+    try {
+      const res = await fetch("/api/delete-account", {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok || !data.success) {
-      alert(data?.error || "Failed to delete account. Please try again.");
+      if (!res.ok || !data.success) {
+        alert(data?.error || "Failed to delete account. Please try again.");
+        setDeleting(false);
+        return;
+      }
+
+      alert("Account deleted successfully.");
+      router.push("/auth"); // redirect to login/signup page
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred. Please try again.");
       setDeleting(false);
-      return;
     }
+  };
 
-    alert("Account deleted successfully.");
-    router.push("/auth"); // redirect to login/signup page
-  } catch (err) {
-    console.error(err);
-    alert("An error occurred. Please try again.");
-    setDeleting(false);
-  }
-};
-
+  // LOGOUT FUNCTION
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      // Delete the JWT cookie
+      await fetch("/api/logout", { method: "POST", credentials: "include" });
+      router.push("/auth");
+    } catch (err) {
+      console.error(err);
+      alert("Logout failed");
+      setLoggingOut(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -168,20 +180,32 @@ const handleDeleteAccount = async () => {
           <p className="text-white mb-4">You have no subscriptions. Choose a membership to get started.</p>
         )}
 
-        {/* DELETE ACCOUNT BUTTON */}
-        <Button
-          onClick={handleDeleteAccount}
-          variant="destructive"
-          disabled={deleting}
-        >
-          {deleting ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Deleting...
-            </>
-          ) : (
-            "Delete Account"
-          )}
-        </Button>
+        {/* BUTTONS */}
+        <div className="flex gap-4 mt-4">
+          <Button
+            onClick={handleDeleteAccount}
+            variant="destructive"
+            disabled={deleting}
+          >
+            {deleting ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : (
+              "Delete Account"
+            )}
+          </Button>
+
+          <Button
+            onClick={handleLogout}
+            variant="secondary"
+            disabled={loggingOut}
+          >
+            {loggingOut ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : (
+              "Logout"
+            )}
+          </Button>
+        </div>
       </main>
     </div>
   );
