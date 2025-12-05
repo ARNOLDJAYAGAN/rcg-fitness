@@ -2,14 +2,14 @@
 
 import { useRouter } from "next/navigation";
 
-export function SimpleHeader() {
+export function SimpleHeader({ textColor = "text-white" }) {
   const router = useRouter();
 
   return (
-    <header className="bg-black text-white p-4">
+    <header className="bg-black p-4 border-none">   {/* ← removed border */}
       <h1
-        className="text-xl font-bold cursor-pointer"
-        onClick={() => router.push("/")}  // <-- go to landing page
+        className={`text-xl font-bold cursor-pointer ${textColor}`}
+        onClick={() => router.push("/")}
       >
         RCG Fitness
       </h1>
