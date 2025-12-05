@@ -13,3 +13,8 @@ export const pool = new Pool({
 pool.connect()
   .then(() => console.log("✅ Connected to Neon DB"))
   .catch((err) => console.error("❌ DB connection error:", err));
+
+// ✅ Export `db` so other modules can import it
+export const db = {
+  query: (text: string, params?: any[]) => pool.query(text, params),
+};
