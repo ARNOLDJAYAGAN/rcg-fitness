@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle } from "lucide-react";
 
@@ -16,11 +17,21 @@ interface Subscription {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
 
-  // Fetch subscriptions directly
+  // Simple check: redirect to login if not "logged in"
+  useEffect(() => {
+    const loggedIn = sessionStorage.getItem("admin_email");
+    if (!loggedIn) {
+      router.replace("/admin"); // redirect to login
+    } else {
+      fetchSubscriptions();
+    }
+  }, [router]);
+
   const fetchSubscriptions = async () => {
     try {
       const res = await fetch("/api/subscription/admin");
@@ -32,10 +43,6 @@ export default function AdminPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchSubscriptions();
-  }, []);
 
   const handleApprove = async (id: number) => {
     setProcessingId(id);

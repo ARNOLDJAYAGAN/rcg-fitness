@@ -31,8 +31,11 @@ export default function AdminLoginPage() {
         return;
       }
 
+      // Save admin login to sessionStorage
+      sessionStorage.setItem("admin_email", email.trim());
+
       // Redirect to admin dashboard
-      router.push("/admin");
+      router.push("/admin-dashboard");
 
     } catch (err) {
       console.error(err);
