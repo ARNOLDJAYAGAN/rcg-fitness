@@ -1,24 +1,33 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 import { pool } from "@/lib/db";
 
-// This function securely deletes the logged-in user
+interface UserPayload {
+  id: number;
+  email: string;
+  name: string;
+}
+
 export async function DELETE(req: NextRequest) {
   try {
-    // Get userId from your session cookie (replace 'userId' with your cookie key)
-    const userId = req.cookies.get("userId")?.value;
+    // Get JWT from cookie
+    const token = req.cookies.get("token")?.value;
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Verify token
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as UserPayload;
 
-    // Delete subscription first (FK dependency)
+    const userId = payload.id;
+
+    // Delete dependent subscription first
     await pool.query("DELETE FROM subscriptions WHERE user_id = $1", [userId]);
-    // Delete user account
+
+    // Delete user
     await pool.query("DELETE FROM users WHERE id = $1", [userId]);
 
-    // Optionally, clear the cookie
+    // Optionally clear cookie
     const response = NextResponse.json({ success: true });
-    response.cookies.delete("userId"); // remove session cookie
+    response.cookies.delete("token"); // remove JWT cookie
     return response;
   } catch (err) {
     console.error("Delete account error:", err);
