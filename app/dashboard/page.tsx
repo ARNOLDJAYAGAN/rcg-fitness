@@ -79,38 +79,35 @@ export default function DashboardPage() {
   }, [user]);
 
   // DELETE ACCOUNT FUNCTION (plain DB deletion)
-  const handleDeleteAccount = async () => {
-    if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) return;
+ // DELETE ACCOUNT FUNCTION
+const handleDeleteAccount = async () => {
+  if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) return;
 
-    if (!user) return;
+  setDeleting(true);
 
-    setDeleting(true);
+  try {
+    const res = await fetch("/api/delete-account", {
+      method: "DELETE",
+      credentials: "include", // send cookies
+    });
 
-    try {
-      const res = await fetch("/api/delete-account", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: user.id }), // send user ID to API
-      });
+    const data = await res.json();
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        alert(data?.error || "Failed to delete account. Please try again.");
-        setDeleting(false);
-        return;
-      }
-
-      alert("Account deleted successfully.");
-      router.push("/auth"); // redirect to login/signup page
-    } catch (err) {
-      console.error(err);
-      alert("An error occurred. Please try again.");
+    if (!res.ok || !data.success) {
+      alert(data?.error || "Failed to delete account. Please try again.");
       setDeleting(false);
+      return;
     }
-  };
+
+    alert("Account deleted successfully.");
+    router.push("/auth"); // redirect to login/signup page
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred. Please try again.");
+    setDeleting(false);
+  }
+};
+
 
   if (loading) {
     return (
