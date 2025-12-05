@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { API_BASE } from "@/lib/api";
 import { SimpleHeader } from "@/components/simple-header";
 
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [showDetails, setShowDetails] = useState(false); // NEW
 
   // Fetch user session
   useEffect(() => {
@@ -57,14 +59,13 @@ export default function DashboardPage() {
     getUser();
   }, [router]);
 
-  // Fetch subscription only when user is loaded
+  // Fetch subscription
   useEffect(() => {
     if (!user) return;
 
     const getSubscription = async () => {
       try {
         const res = await fetch(`${API_BASE}/subscription/${user.id}`);
-
 
         if (!res.ok) {
           setSubscription(null);
@@ -89,7 +90,6 @@ export default function DashboardPage() {
     getSubscription();
   }, [user]);
 
-  // Loading screen
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -105,43 +105,53 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-3xl font-bold mb-8 text-white">Dashboard</h1>
 
-        {/* If subscription exists */}
         {subscription ? (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Your Subscription</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <p><strong>Plan:</strong> {subscription.plan}</p>
-              <p><strong>Price:</strong> ₱{subscription.price}/month</p>
-
-              <p>
-                <strong>Status:</strong>{" "}
+          <>
+            {/* STATUS OUTSIDE THE BOX */}
+            <div className="mb-4">
+              <p className="text-white text-lg">
+                <strong>Status: </strong>
                 <span
                   className={
                     subscription.status === "active"
-                      ? "text-green-500"
+                      ? "text-green-400"
                       : subscription.status === "pending"
-                      ? "text-yellow-500"
-                      : "text-red-500"
+                      ? "text-yellow-400"
+                      : "text-red-400"
                   }
                 >
                   {subscription.status.charAt(0).toUpperCase() +
                     subscription.status.slice(1)}
                 </span>
               </p>
+            </div>
 
-              <p>
-                <strong>Subscribed At:</strong>{" "}
-                {new Date(subscription.subscribed_at).toLocaleString()}
-              </p>
-            </CardContent>
-          </Card>
+            {/* Toggle Button */}
+            <Button
+              onClick={() => setShowDetails(!showDetails)}
+              className="mb-4 flex items-center gap-2"
+            >
+              {showDetails ? "Hide Subscription Details" : "View Subscription Details"}
+              {showDetails ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </Button>
+
+            {/* COLLAPSIBLE BOX */}
+            {showDetails && (
+              <Card className="border border-gray-700 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Subscription Information</CardTitle>
+                </CardHeader>
+
+                <CardContent>
+                  <p><strong>Plan:</strong> {subscription.plan}</p>
+                  <p><strong>Price:</strong> ₱{subscription.price}/month</p>
+                  <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleString()}</p>
+                </CardContent>
+              </Card>
+            )}
+          </>
         ) : (
-          <p className="text-white">
-            You have no subscriptions. Choose a membership to get started.
-          </p>
+          <p className="text-white">You have no subscriptions. Choose a membership to get started.</p>
         )}
       </main>
     </div>
