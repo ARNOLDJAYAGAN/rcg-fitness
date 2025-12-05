@@ -42,6 +42,7 @@
     "@stripe/stripe-js": "^8.5.3",
     "@vercel/analytics": "latest",
     "autoprefixer": "^10.4.20",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

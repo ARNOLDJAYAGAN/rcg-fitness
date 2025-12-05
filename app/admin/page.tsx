@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle } from "lucide-react";
 
@@ -16,16 +17,30 @@ interface Subscription {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
 
+  // Check if admin is logged in
+  const checkAdmin = async () => {
+    try {
+      const res = await fetch("/api/admin-check", { credentials: "include" });
+      const data = await res.json();
+      if (!data.loggedIn) {
+        router.replace("/admin-login"); // redirect to login if not logged in
+      }
+    } catch (err) {
+      console.error("Admin check failed:", err);
+      router.replace("/admin-login");
+    }
+  };
+
   const fetchSubscriptions = async () => {
     try {
       const res = await fetch("/api/subscription/admin", {
-        credentials: "include", // 🔥 MUST INCLUDE ADMIN COOKIE
+        credentials: "include",
       });
-
       const data = await res.json();
       if (data.success) setSubscriptions(data.subscriptions);
     } catch (err) {
@@ -36,6 +51,7 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
+    checkAdmin();
     fetchSubscriptions();
   }, []);
 
@@ -44,13 +60,11 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/subscription/admin/approve", {
         method: "POST",
-        credentials: "include", // 🔥 REQUIRED
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-
       const data = await res.json();
-
       if (data.success) {
         await fetchSubscriptions();
         alert("Subscription approved!");
@@ -65,8 +79,7 @@ export default function AdminPage() {
     }
   };
 
-  if (loading)
-    return <Loader2 className="animate-spin w-8 h-8 mx-auto my-20" />;
+  if (loading) return <Loader2 className="animate-spin w-8 h-8 mx-auto my-20" />;
 
   return (
     <div className="min-h-screen p-8">
