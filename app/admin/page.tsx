@@ -22,7 +22,10 @@ export default function AdminPage() {
 
   const fetchSubscriptions = async () => {
     try {
-      const res = await fetch("/api/subscription/admin");
+      const res = await fetch("/api/subscription/admin", {
+        credentials: "include", // 🔥 MUST INCLUDE ADMIN COOKIE
+      });
+
       const data = await res.json();
       if (data.success) setSubscriptions(data.subscriptions);
     } catch (err) {
@@ -41,12 +44,15 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/subscription/admin/approve", {
         method: "POST",
+        credentials: "include", // 🔥 REQUIRED
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
+
       const data = await res.json();
+
       if (data.success) {
-        fetchSubscriptions();
+        await fetchSubscriptions();
         alert("Subscription approved!");
       } else {
         alert(data.message);
