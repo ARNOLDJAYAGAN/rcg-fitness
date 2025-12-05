@@ -4,7 +4,6 @@ import { pool } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    // Log that the route was called
     console.log("POST /subscriptions/create called");
 
     // Parse JSON safely
@@ -20,10 +19,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { user_id, plan, price, name, phone } = data;
+    const { user_id, plan, price, name, phone, email } = data;
 
-    // Validate fields
-    if (!user_id || !plan || !price || !name || !phone) {
+    // Validate fields including email
+    if (!user_id || !plan || !price || !name || !phone || !email) {
       console.warn("Missing fields in request body");
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
@@ -31,24 +30,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Insert into DB
+    // Insert into DB including email
     let result;
     try {
       result = await pool.query(
-        `INSERT INTO subscriptions (user_id, plan, price, name, phone, status, subscribed_at)
-         VALUES ($1, $2, $3, $4, $5, 'pending', NOW())
+        `INSERT INTO subscriptions (user_id, plan, price, name, phone, email, status, subscribed_at)
+         VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW())
          RETURNING *`,
-        [user_id, plan, parseFloat(price), name, phone]
+        [user_id, plan, parseFloat(price), name, phone, email]
       );
       console.log("Insert result:", result.rows[0]);
     } catch (dbErr: any) {
-  console.error("Database error:", dbErr);
-  return NextResponse.json(
-    { success: false, message: dbErr.message || "Database error" },
-    { status: 500 }
-  );
-}
-
+      console.error("Database error:", dbErr);
+      return NextResponse.json(
+        { success: false, message: dbErr.message || "Database error" },
+        { status: 500 }
+      );
+    }
 
     // Respond with success
     return NextResponse.json({ success: true, subscription: result.rows[0] });
