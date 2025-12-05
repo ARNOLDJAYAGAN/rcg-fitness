@@ -1,24 +1,20 @@
 // app/api/delete-account/route.ts
-import { NextResponse, NextRequest } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
-import { db } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { pool } from "@/lib/db"; // your PostgreSQL client
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(req: Request) {
   try {
-    const { userId } = getAuth(req);
+    // Example: get user ID from a cookie or session (not Clerk)
+    const userId = req.headers.get("x-user-id");
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Delete subscription first
-    await db.query("DELETE FROM subscriptions WHERE user_id = $1", [userId]);
-    // Delete user
-    await db.query("DELETE FROM users WHERE id = $1", [userId]);
+    // Delete dependent data first
+    await pool.query("DELETE FROM subscriptions WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM users WHERE id = $1", [userId]);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Delete error:", error);
+  } catch (err) {
+    console.error(err);
     return NextResponse.json({ error: "Failed to delete account" }, { status: 500 });
   }
 }

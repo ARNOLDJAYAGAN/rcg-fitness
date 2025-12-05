@@ -31,7 +31,7 @@ export default function DashboardPage() {
   const [showDetails, setShowDetails] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Fetch user session
+  // Fetch user session (from your own backend)
   useEffect(() => {
     const getUser = async () => {
       try {
@@ -78,17 +78,23 @@ export default function DashboardPage() {
     getSubscription();
   }, [user]);
 
-  // DELETE ACCOUNT FUNCTION
+  // DELETE ACCOUNT FUNCTION (plain DB deletion)
   const handleDeleteAccount = async () => {
     if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) return;
+
+    if (!user) return;
 
     setDeleting(true);
 
     try {
       const res = await fetch("/api/delete-account", {
         method: "DELETE",
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: user.id }), // send user ID to API
       });
+
       const data = await res.json();
 
       if (!res.ok || !data.success) {
