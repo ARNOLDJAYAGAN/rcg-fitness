@@ -23,12 +23,11 @@ export async function GET(
 
     const sub = result.rows[0];
 
-    // Ensure status and numeric fields
+    // Remove expires_at entirely, just use status
     const subscription = {
       ...sub,
       status: sub.status || "pending",
       price: Number(sub.price),
-      expires_at: sub.expires_at || null,
     };
 
     return NextResponse.json({ success: true, subscription });

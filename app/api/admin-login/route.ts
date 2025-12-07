@@ -6,22 +6,32 @@ export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json({ success: false, message: "Email and password required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Email and password required" },
+        { status: 400 }
+      );
     }
 
+    // Check admin credentials
     const result = await pool.query(
       "SELECT * FROM admins WHERE email = $1 AND password = $2",
-      [email, password] // plain password for prototype
+      [email, password] // plain password (for prototype)
     );
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Invalid credentials" },
+        { status: 401 }
+      );
     }
 
     // Login successful
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+  } catch (err: any) {
+    console.error("Admin login error:", err);
+    return NextResponse.json(
+      { success: false, message: err.message || "Server error" },
+      { status: 500 }
+    );
   }
 }

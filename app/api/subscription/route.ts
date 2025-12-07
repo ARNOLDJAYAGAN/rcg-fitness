@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const { user_id, plan, price, phone, name } = await req.json();
 
-    // Validate all required fields
+    // Validate required fields
     if (!user_id || !plan || !price || !phone || !name) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
@@ -14,13 +14,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Insert pending subscription
-    await pool.query(
-      `INSERT INTO subscriptions (user_id, plan, price, phone, name, status, subscribed_at)
-       VALUES ($1, $2, $3, $4, $5, 'pending', NOW())`,
-      [user_id, plan, parseFloat(price), phone, name]
+    const result = await pool.query(
+      `INSERT INTO subscriptions 
+        (user_id, plan, price, phone, name, status, subscribed_at)
+       VALUES ($1, $2, $3, $4, $5, 'pending', NOW())
+       RETURNING id, user_id, plan, price, phone, name, status, subscribed_at`,
+      [parseInt(user_id, 10), plan, parseFloat(price), phone, name]
     );
 
-    return NextResponse.json({ success: true, message: "Subscription created successfully" });
+    return NextResponse.json({
+      success: true,
+      message: "Subscription created successfully",
+      subscription: result.rows[0], // return the created subscription
+    });
   } catch (err: any) {
     console.error("Subscription API error:", err);
     return NextResponse.json(

@@ -20,7 +20,6 @@ interface Subscription {
   price: number;
   status: string;
   subscribed_at: string;
-  expires_at: string | null; // allow null
 }
 
 export default function DashboardPage() {
@@ -50,7 +49,6 @@ export default function DashboardPage() {
         setLoading(false);
       }
     };
-
     getUser();
   }, [router]);
 
@@ -64,12 +62,10 @@ export default function DashboardPage() {
         const data = await res.json();
 
         if (data.success && data.subscription) {
-          // Ensure numeric and default values
           setSubscription({
             ...data.subscription,
             price: Number(data.subscription.price),
             status: data.subscription.status || "pending",
-            expires_at: data.subscription.expires_at || null,
           });
         } else {
           setSubscription(null);
@@ -79,7 +75,6 @@ export default function DashboardPage() {
         setSubscription(null);
       }
     };
-
     getSubscription();
   }, [user]);
 
@@ -167,7 +162,6 @@ export default function DashboardPage() {
                   <p><strong>Plan:</strong> {subscription.plan}</p>
                   <p><strong>Price:</strong> ₱{subscription.price.toFixed(2)}/month</p>
                   <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleString()}</p>
-                  <p><strong>Expires At:</strong> {subscription.expires_at ? new Date(subscription.expires_at).toLocaleString() : "N/A"}</p>
                 </CardContent>
               </Card>
             )}
