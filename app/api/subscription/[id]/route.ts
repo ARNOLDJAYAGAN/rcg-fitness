@@ -6,7 +6,13 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = params.id;
+    const userId = parseInt(params.id, 10);
+    if (isNaN(userId)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid user ID" },
+        { status: 400 }
+      );
+    }
 
     const result = await pool.query(
       `SELECT * FROM subscriptions 
@@ -17,10 +23,10 @@ export async function GET(
     );
 
     if (result.rows.length === 0) {
-      return NextResponse.json({
-        success: false,
-        message: "No subscription found",
-      });
+      return NextResponse.json(
+        { success: false, message: "No subscription found" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({

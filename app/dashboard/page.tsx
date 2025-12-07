@@ -20,7 +20,7 @@ interface Subscription {
   price: number;
   status: string;
   subscribed_at: string;
-  expires_at: string;
+  expires_at: string | null; // allow null
 }
 
 export default function DashboardPage() {
@@ -63,16 +63,16 @@ export default function DashboardPage() {
 
     const getSubscription = async () => {
       try {
-        const res = await fetch(`${API_BASE}/subscription/${user.id}`);
-        if (!res.ok) {
-          setSubscription(null);
-          return;
-        }
+        // Ensure user ID is a number to match your DB
+        const userId = Number(user.id);
+        const res = await fetch(`${API_BASE}/subscription/${userId}`);
         const data = await res.json();
+
         if (data.success) setSubscription(data.subscription);
         else setSubscription(null);
       } catch (err) {
         console.error("Failed to fetch subscription:", err);
+        setSubscription(null);
       }
     };
 
@@ -90,7 +90,6 @@ export default function DashboardPage() {
         method: "DELETE",
         credentials: "include",
       });
-
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -132,7 +131,6 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <SimpleHeader />
-
       <main className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-3xl font-bold mb-8 text-white">Dashboard</h1>
 
@@ -170,9 +168,9 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p><strong>Plan:</strong> {subscription.plan}</p>
-                  <p><strong>Price:</strong> ₱{subscription.price}/month</p>
+                  <p><strong>Price:</strong> ₱{Number(subscription.price).toFixed(2)}/month</p>
                   <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleString()}</p>
-                  <p><strong>Expires At:</strong> {new Date(subscription.expires_at).toLocaleString()}</p>
+                  <p><strong>Expires At:</strong> {subscription.expires_at ? new Date(subscription.expires_at).toLocaleString() : "N/A"}</p>
                 </CardContent>
               </Card>
             )}
@@ -181,18 +179,13 @@ export default function DashboardPage() {
           <p className="text-white mb-4">You have no subscriptions. Choose a membership to get started.</p>
         )}
 
-        {/* DELETE ACCOUNT & LOGOUT BUTTONS */}
         <div className="flex gap-4 mt-4">
           <Button
             onClick={handleDeleteAccount}
             variant="destructive"
             disabled={deleting}
           >
-            {deleting ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            ) : (
-              "Delete Account"
-            )}
+            {deleting ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Delete Account"}
           </Button>
 
           <Button
@@ -200,11 +193,7 @@ export default function DashboardPage() {
             variant="secondary"
             disabled={loggingOut}
           >
-            {loggingOut ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            ) : (
-              "Logout"
-            )}
+            {loggingOut ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Logout"}
           </Button>
         </div>
       </main>
