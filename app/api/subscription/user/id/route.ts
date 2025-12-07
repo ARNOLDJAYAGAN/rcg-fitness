@@ -6,15 +6,14 @@ export async function GET(
   { params }: { params: { userId: string } }
 ) {
   const { userId } = params;
-  if (!userId)
-    return NextResponse.json(
-      { success: false, message: "Missing userId" },
-      { status: 400 }
-    );
+
+  if (!userId) {
+    return NextResponse.json({ success: false, message: "Missing userId" }, { status: 400 });
+  }
 
   try {
     const result = await pool.query(
-      `SELECT id, plan, price, status, subscribed_at, expires_at
+      `SELECT id, plan, price, status, subscribed_at
        FROM subscriptions
        WHERE user_id = $1
        ORDER BY subscribed_at DESC
@@ -22,10 +21,15 @@ export async function GET(
       [parseInt(userId, 10)]
     );
 
-    return NextResponse.json({
-      success: true,
-      subscription: result.rows[0] || null,
-    });
+    const subscription = result.rows[0]
+      ? {
+          ...result.rows[0],
+          price: Number(result.rows[0].price),
+          status: result.rows[0].status || "pending",
+        }
+      : null;
+
+    return NextResponse.json({ success: true, subscription });
   } catch (err: any) {
     console.error("GET subscription error:", err);
     return NextResponse.json(
