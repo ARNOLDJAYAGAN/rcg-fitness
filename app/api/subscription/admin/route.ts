@@ -1,17 +1,20 @@
+// /api/subscriptions/admin/approve/route.ts
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
-export async function GET() {
+export async function POST(req: Request) {
   try {
-    const result = await pool.query(
-      `SELECT id, user_id, name, email, phone, plan, price, status, subscribed_at
-       FROM subscriptions
-       ORDER BY subscribed_at DESC`
+    const { id } = await req.json();
+    if (!id) return NextResponse.json({ success: false, message: "Missing subscription ID" });
+
+    await pool.query(
+      `UPDATE subscriptions SET status='active' WHERE id=$1`,
+      [id]
     );
 
-    return NextResponse.json({ success: true, subscriptions: result.rows });
+    return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error("Admin GET error:", err);
-    return NextResponse.json({ success: false, message: err.message || "Server error" }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ success: false, message: err.message });
   }
 }

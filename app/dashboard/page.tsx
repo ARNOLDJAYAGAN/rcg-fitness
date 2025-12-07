@@ -20,6 +20,7 @@ interface Subscription {
   price: number;
   status: string;
   subscribed_at: string;
+  expires_at: string;
 }
 
 export default function DashboardPage() {
@@ -37,11 +38,15 @@ export default function DashboardPage() {
     const getUser = async () => {
       try {
         const res = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
-        if (!res.ok) return router.push("/auth");
-
+        if (!res.ok) {
+          router.push("/auth");
+          return;
+        }
         const data = await res.json();
-        if (!data.loggedIn) return router.push("/auth");
-
+        if (!data.loggedIn) {
+          router.push("/auth");
+          return;
+        }
         setUser(data.user);
       } catch {
         router.push("/auth");
@@ -58,37 +63,38 @@ export default function DashboardPage() {
 
     const getSubscription = async () => {
       try {
-        const res = await fetch(`${API_BASE}/subscription/${Number(user.id)}`);
-        const data = await res.json();
-
-        if (data.success && data.subscription) {
-          setSubscription({
-            ...data.subscription,
-            price: Number(data.subscription.price),
-            status: data.subscription.status || "pending",
-          });
-        } else {
+        const res = await fetch(`${API_BASE}/subscription/${user.id}`);
+        if (!res.ok) {
           setSubscription(null);
+          return;
         }
+        const data = await res.json();
+        if (data.success) setSubscription(data.subscription);
+        else setSubscription(null);
       } catch (err) {
         console.error("Failed to fetch subscription:", err);
-        setSubscription(null);
       }
     };
+
     getSubscription();
   }, [user]);
 
-  // DELETE ACCOUNT
+  // DELETE ACCOUNT FUNCTION
   const handleDeleteAccount = async () => {
     if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) return;
+
     setDeleting(true);
 
     try {
-      const res = await fetch("/api/delete-account", { method: "DELETE", credentials: "include" });
+      const res = await fetch("/api/delete-account", {
+        method: "DELETE",
+        credentials: "include",
+      });
+
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        alert(data?.error || "Failed to delete account.");
+        alert(data?.error || "Failed to delete account. Please try again.");
         setDeleting(false);
         return;
       }
@@ -102,7 +108,7 @@ export default function DashboardPage() {
     }
   };
 
-  // LOGOUT
+  // LOGOUT FUNCTION
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
@@ -126,6 +132,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <SimpleHeader />
+
       <main className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-3xl font-bold mb-8 text-white">Dashboard</h1>
 
@@ -148,7 +155,10 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <Button onClick={() => setShowDetails(!showDetails)} className="mb-4 flex items-center gap-2">
+            <Button
+              onClick={() => setShowDetails(!showDetails)}
+              className="mb-4 flex items-center gap-2"
+            >
               {showDetails ? "Hide Subscription Details" : "View Subscription Details"}
               {showDetails ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </Button>
@@ -160,8 +170,9 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p><strong>Plan:</strong> {subscription.plan}</p>
-                  <p><strong>Price:</strong> ₱{subscription.price.toFixed(2)}/month</p>
+                  <p><strong>Price:</strong> ₱{subscription.price}/month</p>
                   <p><strong>Subscribed At:</strong> {new Date(subscription.subscribed_at).toLocaleString()}</p>
+                  <p><strong>Expires At:</strong> {new Date(subscription.expires_at).toLocaleString()}</p>
                 </CardContent>
               </Card>
             )}
@@ -170,12 +181,30 @@ export default function DashboardPage() {
           <p className="text-white mb-4">You have no subscriptions. Choose a membership to get started.</p>
         )}
 
+        {/* DELETE ACCOUNT & LOGOUT BUTTONS */}
         <div className="flex gap-4 mt-4">
-          <Button onClick={handleDeleteAccount} variant="destructive" disabled={deleting}>
-            {deleting ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Delete Account"}
+          <Button
+            onClick={handleDeleteAccount}
+            variant="destructive"
+            disabled={deleting}
+          >
+            {deleting ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : (
+              "Delete Account"
+            )}
           </Button>
-          <Button onClick={handleLogout} variant="secondary" disabled={loggingOut}>
-            {loggingOut ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Logout"}
+
+          <Button
+            onClick={handleLogout}
+            variant="secondary"
+            disabled={loggingOut}
+          >
+            {loggingOut ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : (
+              "Logout"
+            )}
           </Button>
         </div>
       </main>
