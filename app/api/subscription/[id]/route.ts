@@ -7,32 +7,31 @@ export async function GET(
 ) {
   try {
     const userId = parseInt(params.id, 10);
-    if (isNaN(userId)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid user ID" },
-        { status: 400 }
-      );
-    }
 
     const result = await pool.query(
-      `SELECT * FROM subscriptions 
-       WHERE user_id = $1 
-       ORDER BY subscribed_at DESC 
+      `SELECT *
+       FROM subscriptions
+       WHERE user_id = $1
+       ORDER BY subscribed_at DESC
        LIMIT 1`,
       [userId]
     );
 
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        { success: false, message: "No subscription found" },
-        { status: 404 }
-      );
+    if (!result.rows.length) {
+      return NextResponse.json({ success: false, subscription: null });
     }
 
-    return NextResponse.json({
-      success: true,
-      subscription: result.rows[0],
-    });
+    const sub = result.rows[0];
+
+    // Ensure status and numeric fields
+    const subscription = {
+      ...sub,
+      status: sub.status || "pending",
+      price: Number(sub.price),
+      expires_at: sub.expires_at || null,
+    };
+
+    return NextResponse.json({ success: true, subscription });
   } catch (err: any) {
     console.error("Fetch subscription error:", err);
     return NextResponse.json(

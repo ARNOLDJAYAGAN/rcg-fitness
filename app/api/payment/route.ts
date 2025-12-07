@@ -4,8 +4,9 @@ import { pool } from "@/lib/db";
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { user_id, plan, price, name, phone } = data;
+    const { user_id, plan, price, name, phone, email } = data;
 
+    // Validate required fields
     if (!user_id || !plan || !price || !name || !phone) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
@@ -15,12 +16,13 @@ export async function POST(req: NextRequest) {
 
     console.log("Payment body:", data);
 
+    // Insert subscription with safe defaults
     const result = await pool.query(
       `INSERT INTO subscriptions 
-       (user_id, plan, price, name, phone, status, subscribed_at)
-       VALUES ($1, $2, $3, $4, $5, 'pending', NOW())
+       (user_id, plan, price, name, phone, email, status, subscribed_at, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW(), NULL)
        RETURNING *`,
-      [user_id, plan, parseFloat(price), name, phone]
+      [parseInt(user_id, 10), plan, parseFloat(price), name, phone, email || null]
     );
 
     console.log("Inserted payment subscription:", result.rows[0]);

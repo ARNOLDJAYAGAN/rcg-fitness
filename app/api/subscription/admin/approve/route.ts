@@ -1,38 +1,27 @@
-// /api/subscriptions/admin/approve/route.ts
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
-export async function POST(req: Request) {
+export async function GET() {
   try {
-    const { id } = await req.json();
-    if (!id)
-      return NextResponse.json({
-        success: false,
-        message: "Missing subscription ID",
-      });
-
-    // Update status + set expiration 30 days ahead
     const result = await pool.query(
-      `
-      UPDATE subscriptions
-      SET status = 'active',
-          expires_at = NOW() + INTERVAL '30 days'
-      WHERE id = $1
-      RETURNING *;
-      `,
-      [id]
+      `SELECT *
+       FROM subscriptions
+       ORDER BY subscribed_at DESC`
     );
 
-    if (!result.rows.length) {
-      return NextResponse.json({
-        success: false,
-        message: "Subscription not found",
-      });
-    }
+    const subscriptions = result.rows.map((sub) => ({
+      ...sub,
+      status: sub.status || "pending",
+      price: Number(sub.price),
+      expires_at: sub.expires_at || null,
+    }));
 
-    return NextResponse.json({ success: true, subscription: result.rows[0] });
+    return NextResponse.json({ success: true, subscriptions });
   } catch (err: any) {
-    console.error("APPROVE ERROR:", err);
-    return NextResponse.json({ success: false, message: err.message });
+    console.error("Admin GET error:", err);
+    return NextResponse.json(
+      { success: false, message: err.message || "Server error" },
+      { status: 500 }
+    );
   }
 }

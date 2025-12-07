@@ -4,7 +4,7 @@ import { pool } from "@/lib/db";
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { user_id, plan, price, name, phone } = data;
+    const { user_id, plan, price, name, phone, email } = data;
 
     if (!user_id || !plan || !price || !name || !phone) {
       return NextResponse.json(
@@ -13,44 +13,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch user email
-    const userRes = await pool.query(
-      "SELECT email FROM users WHERE id = $1",
-      [user_id]
-    );
-
-    if (!userRes.rows.length) {
-      return NextResponse.json(
-        { success: false, message: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    const email = userRes.rows[0].email;
-
-    // Insert subscription with NULL expires_at
+    // Insert subscription
     const result = await pool.query(
-      `INSERT INTO subscriptions (
-         user_id,
-         email,
-         plan,
-         price,
-         name,
-         phone,
-         status,
-         subscribed_at,
-         expires_at
-       )
+      `INSERT INTO subscriptions
+        (user_id, plan, price, name, phone, email, status, subscribed_at, expires_at)
        VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW(), NULL)
        RETURNING *`,
-      [user_id, email, plan, parseFloat(price), name, phone]
+      [parseInt(user_id, 10), plan, parseFloat(price), name, phone, email || null]
     );
 
     return NextResponse.json({
       success: true,
+      message: "Subscription created and pending",
       subscription: result.rows[0],
     });
-
   } catch (err: any) {
     console.error("Subscription create error:", err);
     return NextResponse.json(
